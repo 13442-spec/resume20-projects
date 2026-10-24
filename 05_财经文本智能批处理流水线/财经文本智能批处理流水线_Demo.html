@@ -1,0 +1,1191 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f5f7f6">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2316322a'/%3E%3Cpath d='M8 9h16v14H8zM12 13h8m-8 4h6' fill='none' stroke='%23f5f7f6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <meta name="description" content="财经文本智能批处理流水线离线交互 Demo：筛选事件并查看页码或新闻链接证据。">
+  <title>财经证据台｜离线事件分析 Demo</title>
+  <style>
+:root {
+  color-scheme: light;
+  --gray-0: oklch(99% 0.003 160);
+  --gray-1: oklch(97% 0.005 160);
+  --gray-2: oklch(93% 0.006 160);
+  --gray-3: oklch(86% 0.008 160);
+  --gray-5: oklch(64% 0.012 160);
+  --gray-6: oklch(53% 0.014 160);
+  --gray-7: oklch(40% 0.014 160);
+  --gray-9: oklch(18% 0.014 160);
+  --accent: oklch(46% 0.11 155);
+  --accent-hover: oklch(40% 0.11 155);
+  --accent-tint: oklch(46% 0.11 155 / 0.08);
+  --accent-soft: oklch(94% 0.035 155);
+  --success: oklch(50% 0.13 155);
+  --warning: oklch(62% 0.14 75);
+  --danger: oklch(52% 0.18 25);
+  --info: oklch(52% 0.11 245);
+  --surface-canvas: var(--gray-0);
+  --surface-sidebar: var(--gray-1);
+  --surface-raised: white;
+  --surface-sunken: var(--gray-1);
+  --surface-overlay: white;
+  --text-primary: var(--gray-9);
+  --text-secondary: var(--gray-6);
+  --text-tertiary: var(--gray-5);
+  --border-subtle: oklch(18% 0.014 160 / 0.07);
+  --border-default: oklch(18% 0.014 160 / 0.13);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-input: 6px;
+  --radius-card: 10px;
+  --radius-modal: 14px;
+  --shadow-card: 0 0 0 1px oklch(0% 0 0 / 0.035), 0 2px 8px oklch(0% 0 0 / 0.045);
+  --shadow-overlay: 0 0 0 1px oklch(0% 0 0 / 0.05), 0 20px 50px oklch(0% 0 0 / 0.16);
+  --duration-fast: 100ms;
+  --duration-base: 180ms;
+  --duration-drawer: 260ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --z-sticky: 20;
+  --z-backdrop: 30;
+  --z-drawer: 40;
+  --z-toast: 50;
+  font-family: "Microsoft YaHei UI", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+  font-synthesis: none;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-canvas: oklch(15% 0.01 160);
+  --surface-sidebar: oklch(18.5% 0.012 160);
+  --surface-raised: oklch(20% 0.012 160);
+  --surface-sunken: oklch(12.5% 0.01 160);
+  --surface-overlay: oklch(21% 0.012 160);
+  --text-primary: oklch(94% 0.006 160);
+  --text-secondary: oklch(72% 0.01 160);
+  --text-tertiary: oklch(57% 0.012 160);
+  --border-subtle: oklch(100% 0 0 / 0.07);
+  --border-default: oklch(100% 0 0 / 0.14);
+  --accent: oklch(70% 0.09 155);
+  --accent-hover: oklch(76% 0.09 155);
+  --accent-tint: oklch(70% 0.09 155 / 0.11);
+  --accent-soft: oklch(28% 0.035 155);
+  --success: oklch(72% 0.11 155);
+  --warning: oklch(77% 0.12 75);
+  --danger: oklch(70% 0.14 25);
+  --info: oklch(72% 0.1 245);
+  --shadow-card: 0 0 0 1px var(--border-subtle), inset 0 1px 0 oklch(100% 0 0 / 0.025);
+  --shadow-overlay: 0 0 0 1px var(--border-default), 0 20px 50px oklch(0% 0 0 / 0.35);
+}
+
+* { box-sizing: border-box; }
+html { background: var(--surface-canvas); scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--surface-canvas); color: var(--text-primary); font-size: 14px; line-height: 1.5; }
+button, input, select { font: inherit; }
+button, select { cursor: pointer; }
+button { color: inherit; }
+svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+strong, .tabular, dd, code { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid color-mix(in oklch, var(--accent) 55%, transparent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.skip-link { position: fixed; left: 16px; top: -60px; z-index: 100; padding: 10px 14px; border-radius: var(--radius-input); background: var(--surface-overlay); box-shadow: var(--shadow-overlay); color: var(--text-primary); }
+.skip-link:focus { top: 12px; }
+
+.app-shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+.sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 20px 14px; background: var(--surface-sidebar); border-right: 1px solid var(--border-subtle); overscroll-behavior: contain; z-index: var(--z-sticky); }
+.brand { display: flex; align-items: center; gap: 11px; min-height: 48px; padding: 0 8px 18px; }
+.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 9px; background: var(--accent); color: white; box-shadow: 0 4px 12px color-mix(in oklch, var(--accent) 20%, transparent); }
+.brand-mark svg { width: 22px; height: 22px; stroke-width: 1.7; }
+.brand strong { display: block; font-size: 15px; letter-spacing: -0.01em; }
+.brand small { display: block; margin-top: 1px; color: var(--text-tertiary); font-size: 10px; letter-spacing: 0.02em; }
+.nav-list { display: grid; gap: 5px; margin-top: 10px; }
+.nav-item { position: relative; display: flex; align-items: center; gap: 11px; width: 100%; min-height: 44px; padding: 0 11px; border: 0; border-radius: var(--radius-input); background: transparent; color: var(--text-secondary); text-align: left; transition: background-color var(--duration-fast), color var(--duration-fast), transform var(--duration-fast); }
+.nav-item svg { width: 18px; height: 18px; }
+.nav-item:hover { background: color-mix(in oklch, var(--text-primary) 4%, transparent); color: var(--text-primary); }
+.nav-item:active { transform: scale(0.985); }
+.nav-item.is-active { background: var(--accent-tint); color: var(--accent); font-weight: 600; }
+.nav-item.is-active::before { content: ""; position: absolute; left: -14px; width: 3px; height: 22px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.nav-count { margin-left: auto; min-width: 22px; padding: 1px 6px; border-radius: 999px; background: color-mix(in oklch, var(--warning) 13%, transparent); color: var(--warning); font-size: 11px; text-align: center; }
+.sidebar-meta { margin-top: auto; padding: 16px 9px 4px; border-top: 1px solid var(--border-subtle); }
+.sidebar-meta code { display: block; margin: 8px 0 3px; overflow: hidden; color: var(--text-secondary); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-meta small { color: var(--text-tertiary); font-size: 10px; }
+.status-line { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; }
+.status-line i { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px color-mix(in oklch, var(--success) 15%, transparent); }
+
+.main-content { min-width: 0; }
+.topbar { position: sticky; top: 0; z-index: var(--z-sticky); display: flex; align-items: center; min-height: 64px; padding: 9px 24px; border-bottom: 1px solid var(--border-subtle); background: color-mix(in oklch, var(--surface-canvas) 92%, transparent); backdrop-filter: blur(14px); }
+.topbar-title { min-width: 0; }
+.topbar-title p, .panel-heading p, .section-intro p, .drawer-header p, .dialog-header p { margin: 0 0 2px; color: var(--text-tertiary); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.topbar-title h1 { margin: 0; overflow: hidden; font-size: 18px; letter-spacing: -0.02em; text-overflow: ellipsis; white-space: nowrap; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.ghost-button, .icon-button, .reset-button, .text-button { min-height: 44px; border: 1px solid var(--border-default); background: var(--surface-raised); transition: background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast), transform var(--duration-fast); }
+.ghost-button { display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; border-radius: var(--radius-input); }
+.ghost-button svg { width: 17px; height: 17px; }
+.ghost-button:hover, .icon-button:hover { border-color: color-mix(in oklch, var(--accent) 40%, var(--border-default)); color: var(--accent); }
+.ghost-button:active, .icon-button:active, .reset-button:active { transform: scale(0.97); }
+.icon-button { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: var(--radius-input); }
+.mobile-menu { display: none; margin-right: 10px; }
+.text-button { min-height: 36px; padding: 0; border: 0; background: transparent; color: var(--accent); font-size: 12px; }
+.text-button:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.view { padding: 24px; animation: view-in var(--duration-base) var(--ease-out); }
+@keyframes view-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.metric-layout { display: grid; grid-template-columns: minmax(320px, 1.75fr) repeat(3, minmax(150px, 1fr)); gap: 16px; }
+.hero-metric, .secondary-metric, .status-metric, .panel, .table-panel, .review-notice, .review-card, .method-story, .boundary-card, .principle-card { border: 1px solid var(--border-subtle); background: var(--surface-raised); box-shadow: var(--shadow-card); }
+.hero-metric { display: flex; align-items: flex-end; justify-content: space-between; min-height: 150px; padding: 22px; border-radius: var(--radius-modal); background: var(--accent-soft); }
+.hero-metric p, .secondary-metric p, .status-metric p { margin: 0 0 10px; color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+.hero-metric strong { display: block; color: var(--accent); font-size: clamp(42px, 4vw, 60px); line-height: 0.95; letter-spacing: -0.05em; }
+.hero-metric span, .secondary-metric span, .status-metric > span { display: block; margin-top: 13px; color: var(--text-secondary); font-size: 12px; }
+.hero-sparkline { width: min(42%, 190px); height: 72px; overflow: visible; }
+.spark-line { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.spark-fill { stroke: none; fill: color-mix(in oklch, var(--accent) 12%, transparent); }
+.secondary-metric, .status-metric { min-height: 150px; padding: 20px; border-radius: var(--radius-card); }
+.secondary-metric strong { display: block; font-size: 31px; line-height: 1; letter-spacing: -0.035em; }
+.status-metric > div { display: flex; align-items: center; gap: 8px; }
+.status-metric strong { font-size: 22px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.status-ok { background: var(--success); box-shadow: 0 0 0 4px color-mix(in oklch, var(--success) 13%, transparent); }
+
+.overview-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.8fr); gap: 16px; margin-top: 16px; }
+.panel { min-width: 0; padding: 20px; border-radius: var(--radius-card); }
+.panel-wide { grid-column: 1; }
+.panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.panel-heading h2 { margin: 0; font-size: 17px; letter-spacing: -0.015em; }
+.bar-chart { display: grid; gap: 11px; }
+.bar-row { display: grid; grid-template-columns: minmax(110px, 1.15fr) minmax(180px, 3fr) 42px; align-items: center; gap: 12px; min-height: 24px; }
+.bar-label { overflow: hidden; color: var(--text-secondary); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 7px; overflow: hidden; border-radius: 999px; background: var(--surface-sunken); }
+.bar-fill { height: 100%; border-radius: inherit; background: var(--accent); transform-origin: left; animation: grow-bar var(--duration-drawer) var(--ease-out) both; }
+@keyframes grow-bar { from { transform: scaleX(0); } }
+.bar-value { text-align: right; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.segmented-meter { display: flex; height: 12px; overflow: hidden; border-radius: 999px; background: var(--surface-sunken); }
+.meter-segment { min-width: 2px; }
+.meter-positive { background: var(--accent); }
+.meter-neutral { background: var(--info); }
+.meter-negative { background: var(--danger); }
+.compact-list { display: grid; gap: 12px; margin-top: 20px; }
+.compact-row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.compact-row i { width: 7px; height: 7px; border-radius: 50%; background: var(--text-tertiary); }
+.compact-row span { color: var(--text-secondary); }
+.compact-row strong { font-size: 13px; }
+.compact-row small { grid-column: 2 / -1; margin-top: -8px; color: var(--text-tertiary); }
+.risk-list .compact-row { grid-template-columns: minmax(0, 1fr) auto; }
+.risk-list .risk-track { grid-column: 1 / -1; height: 5px; border-radius: 999px; background: var(--surface-sunken); }
+.risk-list .risk-track b { display: block; height: 100%; border-radius: inherit; background: var(--warning); }
+.evidence-panel { min-height: 190px; }
+.verified-mark { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-size: 12px; font-weight: 700; }
+.verified-mark svg { width: 17px; height: 17px; }
+.evidence-flow { display: grid; grid-template-columns: 1fr 36px 1fr 36px 1fr; align-items: center; gap: 8px; }
+.evidence-flow > div { min-height: 96px; padding: 14px; border-radius: var(--radius-input); background: var(--surface-sunken); }
+.evidence-flow span { display: block; margin-bottom: 9px; color: var(--accent); font-family: ui-monospace, "Cascadia Code", monospace; font-size: 11px; }
+.evidence-flow strong, .evidence-flow small { display: block; }
+.evidence-flow small { margin-top: 4px; color: var(--text-tertiary); }
+.evidence-flow > i { height: 1px; background: var(--border-default); }
+.year-chart { display: flex; align-items: flex-end; gap: 14px; min-height: 145px; padding-top: 15px; }
+.year-column { flex: 1; display: grid; grid-template-rows: 24px 94px 20px; align-items: end; text-align: center; }
+.year-column strong { align-self: start; font-size: 12px; }
+.year-column i { justify-self: center; width: min(30px, 62%); min-height: 3px; border-radius: 5px 5px 2px 2px; background: var(--accent); }
+.year-column span { color: var(--text-tertiary); font-size: 11px; }
+
+.section-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.section-intro h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.035em; }
+.section-intro > div > span { display: block; margin-top: 8px; color: var(--text-secondary); }
+.result-counter { flex: 0 0 auto; min-width: 112px; text-align: right; }
+.result-counter strong { display: block; color: var(--accent); font-size: 32px; line-height: 1; letter-spacing: -0.04em; }
+.result-counter span { color: var(--text-secondary); font-size: 11px; }
+.result-counter.is-warning strong { color: var(--warning); }
+.filter-panel { display: grid; grid-template-columns: minmax(230px, 1.8fr) repeat(5, minmax(120px, 1fr)) auto; align-items: end; gap: 10px; margin-bottom: 12px; padding: 14px; border: 1px solid var(--border-subtle); border-radius: var(--radius-card); background: var(--surface-raised); }
+.filter-panel label { min-width: 0; }
+.filter-panel label > span:first-child { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+.filter-panel select, .filter-panel input { width: 100%; min-height: 42px; border: 1px solid var(--border-default); border-radius: var(--radius-input); background: var(--surface-canvas); color: var(--text-primary); }
+.filter-panel select { padding: 0 30px 0 10px; }
+.input-wrap { position: relative; display: block; }
+.input-wrap svg { position: absolute; left: 11px; top: 50%; width: 17px; height: 17px; color: var(--text-tertiary); transform: translateY(-50%); pointer-events: none; }
+.input-wrap input { padding: 0 10px 0 36px; }
+.filter-panel input::placeholder { color: var(--text-tertiary); }
+.filter-panel select:hover, .filter-panel input:hover { border-color: color-mix(in oklch, var(--accent) 35%, var(--border-default)); }
+.reset-button { padding: 0 10px; border: 0; color: var(--accent); font-size: 12px; }
+.table-panel { overflow: hidden; border-radius: var(--radius-card); }
+.table-scroll { max-height: calc(100vh - 270px); overflow: auto; scrollbar-gutter: stable; }
+table { width: 100%; min-width: 980px; border-collapse: separate; border-spacing: 0; }
+thead { position: sticky; top: 0; z-index: 2; background: var(--surface-raised); }
+th, td { padding: 11px 13px; border-bottom: 1px solid var(--border-subtle); text-align: left; vertical-align: middle; }
+th { color: var(--text-secondary); font-size: 11px; font-weight: 600; white-space: nowrap; }
+td { font-size: 12px; }
+tbody tr { position: relative; cursor: pointer; transition: background-color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast); }
+tbody tr:hover, tbody tr:focus-visible { z-index: 1; background: var(--accent-tint); box-shadow: 0 2px 10px color-mix(in oklch, var(--accent) 8%, transparent); }
+tbody tr:active { transform: scale(0.998); }
+.company-cell strong, .company-cell span { display: block; }
+.company-cell span { margin-top: 2px; color: var(--text-tertiary); font-size: 10px; }
+.summary-cell { max-width: 430px; color: var(--text-secondary); line-height: 1.45; }
+.category-label { display: inline-flex; align-items: center; min-height: 24px; padding: 2px 7px; border-radius: 5px; background: var(--surface-sunken); color: var(--text-secondary); white-space: nowrap; }
+.sentiment-text, .risk-text { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.sentiment-text::before, .risk-text::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); }
+.sentiment-positive::before { background: var(--success); }
+.sentiment-negative::before { background: var(--danger); }
+.sentiment-neutral::before { background: var(--info); }
+.risk-medium::before, .risk-low::before { background: var(--warning); }
+.risk-high::before { background: var(--danger); }
+.date-cell { color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.row-action { color: var(--accent); }
+.row-action svg { width: 17px; height: 17px; }
+.empty-state { display: grid; justify-items: center; gap: 7px; padding: 60px 20px; text-align: center; }
+.empty-state svg { width: 52px; height: 52px; margin-bottom: 7px; color: var(--text-tertiary); }
+.empty-state span { max-width: 420px; color: var(--text-secondary); }
+.empty-state .ghost-button { margin-top: 10px; }
+.pagination { display: flex; align-items: center; justify-content: space-between; min-height: 60px; padding: 8px 13px; color: var(--text-secondary); font-size: 12px; }
+.pagination > div { display: flex; gap: 6px; }
+
+.review-intro { margin-bottom: 16px; }
+.review-notice { display: flex; gap: 13px; margin-bottom: 14px; padding: 16px; border-color: color-mix(in oklch, var(--warning) 24%, var(--border-subtle)); border-radius: var(--radius-card); background: color-mix(in oklch, var(--warning) 5%, var(--surface-raised)); }
+.review-notice > svg { flex: 0 0 22px; color: var(--warning); }
+.review-notice strong, .review-notice p { display: block; margin: 0; }
+.review-notice p { margin-top: 3px; color: var(--text-secondary); }
+.review-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.review-card { display: flex; flex-direction: column; min-height: 180px; padding: 18px; border-radius: var(--radius-card); }
+.review-card header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.review-card header strong { font-size: 15px; }
+.review-card header span { display: inline-flex; align-items: center; gap: 6px; color: var(--warning); font-size: 11px; }
+.review-card header span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--warning); }
+.review-card > p { margin: 15px 0; color: var(--text-secondary); }
+.review-card footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; color: var(--text-tertiary); font-size: 11px; }
+
+.method-grid { display: grid; grid-template-columns: 1.25fr 0.85fr 0.85fr; gap: 16px; }
+.method-story { grid-row: span 2; padding: 22px; border-radius: var(--radius-modal); }
+.method-story h3, .boundary-card h3, .principle-card h3 { margin: 0 0 18px; font-size: 17px; }
+.method-story ol { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.method-story li { position: relative; display: grid; grid-template-columns: 36px 1fr; gap: 13px; min-height: 94px; }
+.method-story li:not(:last-child)::before { content: ""; position: absolute; left: 17px; top: 34px; bottom: 0; width: 1px; background: var(--border-default); }
+.method-story li > span { display: grid; place-items: center; align-self: start; width: 36px; height: 36px; border-radius: 50%; background: var(--accent-tint); color: var(--accent); font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700; }
+.method-story li strong { display: block; margin: 5px 0 4px; }
+.method-story li p { margin: 0; color: var(--text-secondary); }
+.boundary-card, .principle-card { padding: 20px; border-radius: var(--radius-card); }
+.boundary-card > strong { display: block; color: var(--warning); font-size: 20px; letter-spacing: -0.02em; }
+.boundary-card > p { margin: 7px 0 18px; color: var(--text-secondary); }
+.boundary-card code { padding: 1px 4px; border-radius: 3px; background: var(--surface-sunken); font-size: 11px; }
+.boundary-card dl { display: grid; gap: 9px; margin: 0; }
+.boundary-card dl div { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.boundary-card dt { color: var(--text-secondary); }
+.boundary-card dd { margin: 0; font-weight: 700; }
+.boundary-card > small { display: block; margin-top: 17px; padding-top: 13px; border-top: 1px solid var(--border-subtle); color: var(--text-tertiary); }
+.boundary-card.neutral > strong { color: var(--text-primary); }
+.principle-card ul { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.principle-card li { position: relative; padding-left: 17px; color: var(--text-secondary); }
+.principle-card li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+dialog { color: var(--text-primary); }
+dialog::backdrop { background: oklch(10% 0.01 160 / 0.34); backdrop-filter: blur(2px); }
+.drawer { width: min(540px, 100vw); max-width: none; height: 100dvh; max-height: 100dvh; margin: 0 0 0 auto; padding: 0; border: 0; border-left: 1px solid var(--border-default); background: var(--surface-overlay); box-shadow: var(--shadow-overlay); animation: drawer-in var(--duration-drawer) var(--ease-out); }
+@keyframes drawer-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+.drawer-header, .dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px; border-bottom: 1px solid var(--border-subtle); }
+.drawer-header h2, .dialog-header h2 { margin: 0; font-size: 21px; letter-spacing: -0.025em; }
+.drawer-body { padding: 22px; }
+.detail-summary { margin: 0 0 20px; font-size: 16px; line-height: 1.65; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+.detail-grid > div { padding: 12px; border-radius: var(--radius-input); background: var(--surface-sunken); }
+.detail-grid dt { color: var(--text-tertiary); font-size: 10px; }
+.detail-grid dd { margin: 4px 0 0; font-weight: 600; }
+.evidence-block { margin-top: 18px; }
+.evidence-block header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+.evidence-block h3 { margin: 0; font-size: 14px; }
+.copy-button { min-height: 36px; padding: 0 9px; border: 1px solid var(--border-default); border-radius: var(--radius-input); background: var(--surface-raised); color: var(--text-secondary); }
+blockquote { margin: 0; padding: 16px; border-left: 3px solid var(--accent); border-radius: 0 var(--radius-input) var(--radius-input) 0; background: var(--surface-sunken); color: var(--text-secondary); white-space: pre-wrap; }
+.source-card { display: grid; gap: 6px; margin-top: 16px; padding: 14px; border: 1px solid var(--border-subtle); border-radius: var(--radius-input); }
+.source-card strong { font-size: 13px; }
+.source-card span { color: var(--text-secondary); font-size: 12px; }
+.source-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; font-weight: 600; }
+.source-link svg { width: 15px; height: 15px; }
+.review-reason { margin-top: 16px; padding: 13px; border-radius: var(--radius-input); background: color-mix(in oklch, var(--warning) 8%, var(--surface-sunken)); color: var(--text-secondary); }
+.review-reason strong { display: block; margin-bottom: 4px; color: var(--warning); }
+.help-dialog { width: min(560px, calc(100vw - 32px)); max-width: none; padding: 0; border: 1px solid var(--border-default); border-radius: var(--radius-modal); background: var(--surface-overlay); box-shadow: var(--shadow-overlay); }
+.help-steps { display: grid; gap: 14px; margin: 0; padding: 22px; list-style: none; }
+.help-steps li { display: grid; grid-template-columns: 32px 1fr; gap: 12px; }
+.help-steps li > span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-tint); color: var(--accent); font-weight: 700; }
+.help-steps strong, .help-steps p { display: block; margin: 0; }
+.help-steps p { margin-top: 3px; color: var(--text-secondary); }
+.help-boundary { margin: 0 22px 22px; padding: 14px; border-radius: var(--radius-input); background: var(--surface-sunken); }
+.help-boundary strong, .help-boundary p { display: block; margin: 0; }
+.help-boundary p { margin-top: 4px; color: var(--text-secondary); }
+.toast { position: fixed; right: 20px; bottom: 20px; z-index: var(--z-toast); max-width: min(360px, calc(100vw - 40px)); padding: 11px 15px; border: 1px solid var(--border-default); border-radius: var(--radius-input); background: var(--surface-overlay); box-shadow: var(--shadow-overlay); animation: toast-in var(--duration-base) var(--ease-out); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(6px); } }
+
+.workspace-intro { align-items: center; }
+.local-badge { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid color-mix(in oklch, var(--success) 22%, var(--border-default)); border-radius: 999px; background: color-mix(in oklch, var(--success) 7%, var(--surface-raised)); color: var(--success); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.local-badge span { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px color-mix(in oklch, var(--success) 14%, transparent); }
+.workspace-grid { display: grid; grid-template-columns: minmax(320px, .92fr) minmax(420px, 1.08fr); gap: 16px; align-items: start; }
+.ingest-panel, .analysis-panel { padding: 20px; border-radius: var(--radius-card); }
+.ingest-panel h3, .analysis-panel h3 { margin: 0; font-size: 18px; letter-spacing: -0.02em; }
+.file-hint { color: var(--text-tertiary); font-size: 10px; font-weight: 700; letter-spacing: .06em; }
+.dropzone { display: grid; justify-items: center; gap: 7px; min-height: 130px; margin: 2px 0 15px; padding: 22px; border: 1px dashed color-mix(in oklch, var(--accent) 42%, var(--border-default)); border-radius: var(--radius-card); background: color-mix(in oklch, var(--accent) 4%, var(--surface-sunken)); color: var(--text-secondary); text-align: center; cursor: pointer; transition: border-color var(--duration-fast), background var(--duration-fast), transform var(--duration-fast); }
+.dropzone:hover, .dropzone:focus-within, .dropzone.is-dragging { border-color: var(--accent); background: var(--accent-tint); }
+.dropzone:active { transform: scale(.995); }
+.dropzone input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.dropzone-icon { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--border-default); border-radius: 50%; color: var(--accent); font-size: 20px; line-height: 1; }
+.dropzone strong { color: var(--text-primary); font-size: 13px; }
+.dropzone small { color: var(--text-tertiary); }
+.textarea-label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 11px; font-weight: 700; }
+#workspaceInput { display: block; width: 100%; min-height: 210px; resize: vertical; padding: 12px; border: 1px solid var(--border-default); border-radius: var(--radius-input); outline: none; background: var(--surface-sunken); color: var(--text-primary); font: 13px/1.65 inherit; }
+#workspaceInput:focus, .local-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+.workspace-actions { display: flex; align-items: center; gap: 9px; margin-top: 13px; }
+.primary-button { min-height: 38px; padding: 0 15px; border: 1px solid var(--accent); border-radius: var(--radius-input); background: var(--accent); color: white; font-weight: 700; cursor: pointer; }
+.primary-button:hover { background: var(--accent-hover); }
+.privacy-note { display: flex; align-items: flex-start; gap: 7px; margin: 15px 0 0; color: var(--text-tertiary); font-size: 11px; line-height: 1.45; }
+.privacy-note svg { flex: 0 0 15px; width: 15px; height: 15px; color: var(--success); }
+.analysis-status { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 5px; background: var(--surface-sunken); color: var(--text-tertiary); font-size: 10px; font-weight: 700; }
+.analysis-status.is-ready { background: var(--accent-tint); color: var(--accent); }
+.analysis-empty { display: grid; justify-items: center; gap: 8px; min-height: 468px; padding: 88px 28px 40px; color: var(--text-tertiary); text-align: center; }
+.analysis-empty strong { color: var(--text-primary); font-size: 15px; }
+.analysis-empty span { max-width: 330px; font-size: 12px; line-height: 1.6; }
+.empty-orb { display: grid; place-items: center; width: 58px; height: 58px; border: 1px solid var(--border-default); border-radius: 50%; background: var(--accent-tint); color: var(--accent); font-size: 29px; }
+.analysis-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+.analysis-metric { padding: 11px; border: 1px solid var(--border-subtle); border-radius: var(--radius-input); background: var(--surface-sunken); }
+.analysis-metric strong, .analysis-metric span { display: block; }
+.analysis-metric strong { font-size: 19px; letter-spacing: -.03em; }
+.analysis-metric span { margin-top: 2px; color: var(--text-tertiary); font-size: 10px; }
+.analysis-block { padding-top: 15px; border-top: 1px solid var(--border-subtle); }
+.analysis-block + .analysis-block { margin-top: 15px; }
+.analysis-block-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.analysis-block-title strong { font-size: 13px; }
+.analysis-block-title span { color: var(--text-tertiary); font-size: 10px; }
+.chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.analysis-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 27px; padding: 0 8px; border: 1px solid var(--border-default); border-radius: 999px; background: var(--surface-raised); color: var(--text-secondary); font-size: 11px; }
+.analysis-chip b { color: var(--accent); font-size: 10px; }
+.finding-list { display: grid; gap: 7px; }
+.finding-row { display: grid; grid-template-columns: 80px 1fr auto; gap: 8px; align-items: start; padding: 9px 10px; border-radius: var(--radius-input); background: var(--surface-sunken); font-size: 11px; }
+.finding-row strong { color: var(--text-primary); }
+.finding-row p { margin: 0; color: var(--text-secondary); line-height: 1.45; }
+.finding-tag { color: var(--warning); font-size: 10px; white-space: nowrap; }
+.local-search { display: flex; gap: 8px; margin-bottom: 9px; }
+.local-search input { min-width: 0; flex: 1; height: 36px; padding: 0 10px; border: 1px solid var(--border-default); border-radius: var(--radius-input); outline: none; background: var(--surface-sunken); color: var(--text-primary); font-size: 12px; }
+.paragraph-list { display: grid; gap: 7px; max-height: 260px; overflow: auto; }
+.paragraph-row { display: grid; grid-template-columns: 30px 1fr; gap: 8px; padding: 9px 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-input); background: var(--surface-raised); }
+.paragraph-row > span { color: var(--accent); font: 10px ui-monospace, monospace; }
+.paragraph-row p { margin: 0; color: var(--text-secondary); font-size: 11px; line-height: 1.5; }
+.paragraph-row.is-hit { border-color: color-mix(in oklch, var(--accent) 45%, var(--border-default)); background: var(--accent-tint); }
+.workspace-disclaimer { display: flex; gap: 8px; margin-top: 14px; padding: 12px 14px; border: 1px solid color-mix(in oklch, var(--warning) 22%, var(--border-subtle)); border-radius: var(--radius-card); background: color-mix(in oklch, var(--warning) 4%, var(--surface-raised)); color: var(--text-secondary); font-size: 11px; }
+.workspace-disclaimer strong { flex: 0 0 auto; color: var(--warning); }
+
+@media (max-width: 1180px) {
+  .metric-layout { grid-template-columns: 1.6fr repeat(2, 1fr); }
+  .status-metric { grid-column: 2 / -1; min-height: auto; }
+  .filter-panel { grid-template-columns: minmax(240px, 2fr) repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: 64px minmax(0, 1fr); }
+  .sidebar { padding-inline: 8px; }
+  .brand { justify-content: center; padding-inline: 0; }
+  .brand > span:last-child, .nav-item > span:not(.nav-count), .sidebar-meta code, .sidebar-meta small, .status-line { display: none; }
+  .nav-item { justify-content: center; padding: 0; }
+  .nav-item.is-active::before { left: -8px; }
+  .nav-count { position: absolute; right: 1px; top: 1px; min-width: 17px; padding: 0 4px; font-size: 9px; }
+  .overview-grid { grid-template-columns: 1fr; }
+  .panel-wide { grid-column: auto; }
+  .method-grid { grid-template-columns: 1fr 1fr; }
+  .method-story { grid-row: auto; grid-column: 1 / -1; }
+  .workspace-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .app-shell { display: block; }
+  .sidebar { position: fixed; left: 0; width: 248px; transform: translateX(-105%); transition: transform var(--duration-drawer) var(--ease-out); box-shadow: var(--shadow-overlay); }
+  .sidebar.is-open { transform: none; }
+  .sidebar .brand { justify-content: flex-start; padding-inline: 8px; }
+  .sidebar .brand > span:last-child, .sidebar .nav-item > span:not(.nav-count), .sidebar .sidebar-meta code, .sidebar .sidebar-meta small, .sidebar .status-line { display: block; }
+  .sidebar .nav-item { justify-content: flex-start; padding: 0 11px; }
+  .sidebar .nav-count { position: static; margin-left: auto; }
+  .mobile-menu { display: inline-grid; }
+  .topbar { padding-inline: 14px; }
+  .topbar-actions .ghost-button { width: 44px; padding: 0; justify-content: center; }
+  .topbar-actions .ghost-button span, .topbar-actions .ghost-button:not(:has(span)) { font-size: 0; }
+  .topbar-actions .ghost-button { font-size: 0; }
+  .view { padding: 16px 14px 24px; }
+  .metric-layout { grid-template-columns: 1fr 1fr; }
+  .hero-metric { grid-column: 1 / -1; }
+  .status-metric { grid-column: auto; }
+  .filter-panel { grid-template-columns: 1fr 1fr; }
+  .search-field { grid-column: 1 / -1; }
+  .section-intro { align-items: flex-start; }
+  .review-list, .method-grid { grid-template-columns: 1fr; }
+  .method-story { grid-column: auto; }
+  .analysis-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .evidence-flow { grid-template-columns: 1fr; }
+  .evidence-flow > i { width: 1px; height: 18px; margin-left: 20px; }
+}
+
+@media (max-width: 460px) {
+  .metric-layout { grid-template-columns: 1fr; }
+  .hero-metric { min-height: 138px; }
+  .secondary-metric, .status-metric { min-height: 116px; }
+  .filter-panel { grid-template-columns: 1fr; }
+  .search-field { grid-column: auto; }
+  .section-intro { display: block; }
+  .result-counter { margin-top: 16px; text-align: left; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .bar-row { grid-template-columns: 92px minmax(120px, 1fr) 34px; gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+  .sidebar, .topbar-actions, .filter-panel, .pagination, .row-action { display: none !important; }
+  .app-shell { display: block; }
+  .topbar { position: static; padding-inline: 0; }
+  .view { padding: 12px 0; }
+  .panel, .table-panel, .hero-metric, .secondary-metric, .status-metric { box-shadow: none; break-inside: avoid; }
+  .table-scroll { max-height: none; overflow: visible; }
+}
+
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="主导航">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M7 7h18v18H7z"/><path d="M11 12h10M11 16h7M11 20h5"/></svg>
+        </span>
+        <span><strong>财经证据台</strong><small>Finance evidence desk</small></span>
+      </div>
+      <nav class="nav-list" aria-label="Demo 页面">
+        <button class="nav-item is-active" type="button" data-view="overview" aria-current="page">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
+          <span>运行概览</span>
+        </button>
+        <button class="nav-item" type="button" data-view="events">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg>
+          <span>事件检索</span>
+        </button>
+        <button class="nav-item" type="button" data-view="workspace">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/><path d="M16 16h4"/></svg>
+          <span>本地分析</span>
+        </button>
+        <button class="nav-item" type="button" data-view="review">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 3 20h18L12 3Zm0 6v5m0 3v.01"/></svg>
+          <span>待复核队列</span><span class="nav-count" id="reviewNavCount">11</span>
+        </button>
+        <button class="nav-item" type="button" data-view="method">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6m-6 4h6m-6 4h4"/></svg>
+          <span>方法与边界</span>
+        </button>
+      </nav>
+      <div class="sidebar-meta">
+        <span class="status-line"><i aria-hidden="true"></i>冻结数据已载入</span>
+        <code id="sidebarRunId">—</code>
+        <small>无需网络 · 无需 API Key</small>
+      </div>
+    </aside>
+
+    <main id="main-content" class="main-content" tabindex="-1">
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="menuButton" type="button" aria-label="打开导航" aria-expanded="false" aria-controls="sidebar">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="topbar-title">
+          <p id="viewKicker">冻结运行</p>
+          <h1 id="viewTitle">完整语料概览</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="ghost-button" id="helpButton" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.3 2.3 0 1 1 3.3 2.1c-.8.4-1.1 1-1.1 1.9m0 3h.01"/></svg>
+            查看说明
+          </button>
+          <button class="icon-button" id="themeButton" type="button" aria-label="切换深浅主题" title="切换主题">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="view is-active" data-view-panel="overview" aria-labelledby="overviewHeading">
+        <h2 class="sr-only" id="overviewHeading">完整语料运行概览</h2>
+        <div class="metric-layout">
+          <article class="hero-metric">
+            <div>
+              <p>证据验证通过事件</p>
+              <strong id="metricVerified">117</strong>
+              <span id="metricAcceptance">128 条候选中的 91.41%</span>
+            </div>
+            <svg class="hero-sparkline" viewBox="0 0 180 60" role="img" aria-label="各年份有效事件数量走势">
+              <path class="spark-fill" id="sparkFill" d=""/>
+              <path class="spark-line" id="sparkLine" d=""/>
+            </svg>
+          </article>
+          <article class="secondary-metric">
+            <p>输入来源</p><strong id="metricSources">108</strong><span>58 个报告块 · 50 条新闻</span>
+          </article>
+          <article class="secondary-metric">
+            <p>证据命中率</p><strong id="metricEvidence">100%</strong><span>页码与链接均完整</span>
+          </article>
+          <article class="status-metric">
+            <p>运行状态</p>
+            <div><span class="status-dot status-ok" aria-hidden="true"></span><strong>完整</strong></div>
+            <span id="metricFailed">0 个失败来源</span>
+          </article>
+        </div>
+
+        <div class="overview-grid">
+          <article class="panel panel-wide">
+            <div class="panel-heading">
+              <div><p>结构化结果</p><h2>事件类型分布</h2></div>
+              <button class="text-button" type="button" data-jump-view="events">查看全部事件</button>
+            </div>
+            <div class="bar-chart" id="eventTypeChart" aria-label="事件类型数量横向条形图"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p>标签概览</p><h2>情绪构成</h2></div></div>
+            <div class="segmented-meter" id="sentimentMeter" aria-label="情绪构成"></div>
+            <div class="compact-list" id="sentimentList"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p>审慎信号</p><h2>风险等级</h2></div></div>
+            <div class="compact-list risk-list" id="riskList"></div>
+          </article>
+          <article class="panel panel-wide evidence-panel">
+            <div class="panel-heading">
+              <div><p>可追溯性</p><h2>从结论回到原文</h2></div>
+              <span class="verified-mark"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>117 条已校验</span>
+            </div>
+            <div class="evidence-flow" aria-label="证据处理流程">
+              <div><span>01</span><strong>冻结来源</strong><small>PDF 页面 / 新闻快照</small></div>
+              <i aria-hidden="true"></i>
+              <div><span>02</span><strong>结构化抽取</strong><small>实体 · 事件 · 风险</small></div>
+              <i aria-hidden="true"></i>
+              <div><span>03</span><strong>逐字校验</strong><small>页码 / URL / 原文摘录</small></div>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p>语料时间</p><h2>年份覆盖</h2></div></div>
+            <div class="year-chart" id="yearChart"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="events" aria-labelledby="eventsHeading" hidden>
+        <div class="section-intro">
+          <div><p>验证通过事件</p><h2 id="eventsHeading">检索与核验证据</h2><span>筛选结果只包含证据验证通过的正式事件。</span></div>
+          <div class="result-counter" aria-live="polite"><strong id="resultCount">117</strong><span>条匹配事件</span></div>
+        </div>
+        <form class="filter-panel" id="filterForm" role="search">
+          <label class="search-field" for="searchInput">
+            <span>搜索公司、标题或事件</span>
+            <span class="input-wrap"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg><input id="searchInput" name="query" type="search" placeholder="例如：中国联通、回购、智能诊断" autocomplete="off"></span>
+          </label>
+          <label for="sourceFilter"><span>来源</span><select id="sourceFilter" name="source"><option value="">全部来源</option><option value="report">报告</option><option value="news">新闻</option></select></label>
+          <label for="companyFilter"><span>公司</span><select id="companyFilter" name="company"><option value="">全部公司</option></select></label>
+          <label for="typeFilter"><span>事件类型</span><select id="typeFilter" name="eventType"><option value="">全部类型</option></select></label>
+          <label for="sentimentFilter"><span>情绪</span><select id="sentimentFilter" name="sentiment"><option value="">全部情绪</option></select></label>
+          <label for="riskFilter"><span>风险</span><select id="riskFilter" name="risk"><option value="">全部风险</option></select></label>
+          <label for="yearFilter"><span>年份</span><select id="yearFilter" name="year"><option value="">全部年份</option></select></label>
+          <button class="reset-button" id="resetFilters" type="reset" hidden>重置筛选</button>
+        </form>
+        <div class="table-panel" id="eventTableRegion">
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th scope="col">公司与来源</th><th scope="col">事件摘要</th><th scope="col">类型</th><th scope="col">情绪</th><th scope="col">风险</th><th scope="col">日期</th><th scope="col"><span class="sr-only">查看详情</span></th></tr></thead>
+              <tbody id="eventTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="eventEmpty" hidden>
+            <svg aria-hidden="true" viewBox="0 0 64 64"><path d="M13 18h38v31H13zM21 27h22M21 35h14"/><circle cx="48" cy="48" r="9"/><path d="m54 54 6 6"/></svg>
+            <strong>没有符合条件的事件</strong><span>调整筛选条件，或重置后查看全部验证事件。</span>
+            <button type="button" class="ghost-button" data-reset-filters>重置筛选</button>
+          </div>
+          <div class="pagination" id="pagination"><span id="pageSummary">—</span><div><button class="icon-button" id="prevPage" type="button" aria-label="上一页"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button><button class="icon-button" id="nextPage" type="button" aria-label="下一页"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button></div></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="workspace" aria-labelledby="workspaceHeading" hidden>
+        <div class="section-intro workspace-intro">
+          <div><p>本地文本工作台</p><h2 id="workspaceHeading">放入文本，即时分析</h2><span>文本只在当前浏览器内处理，不上传网络；结果是规则/启发式分析，适合展示和初筛。</span></div>
+          <div class="local-badge"><span aria-hidden="true"></span>本地运行</div>
+        </div>
+        <div class="workspace-grid">
+          <article class="panel ingest-panel">
+            <div class="panel-heading"><div><p>输入材料</p><h3>上传或粘贴财经文本</h3></div><span class="file-hint">TXT · MD · JSON · CSV</span></div>
+            <label class="dropzone" id="dropzone" for="textFile">
+              <input id="textFile" type="file" accept=".txt,.md,.json,.csv,text/plain,text/markdown,application/json,text/csv">
+              <span class="dropzone-icon" aria-hidden="true">＋</span>
+              <strong>拖入文件，或点击选择</strong>
+              <small id="fileName">也可以直接在下方粘贴文本</small>
+            </label>
+            <label class="textarea-label" for="workspaceInput">文本内容</label>
+            <textarea id="workspaceInput" rows="12" placeholder="例如：某公司拟投资14亿元建设锂盐基地，预计年产4万吨碳酸锂；受原材料价格波动和客户集中度影响，经营风险仍需关注。"></textarea>
+            <div class="workspace-actions"><button class="primary-button" id="analyzeText" type="button">开始分析</button><button class="ghost-button" id="loadSampleText" type="button">载入示例</button><button class="text-button" id="clearWorkspace" type="button">清空</button></div>
+            <p class="privacy-note"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>隐私提示：浏览器本地规则分析，不会自动发送到 API 或服务器。</p>
+          </article>
+          <article class="panel analysis-panel" id="analysisPanel" aria-live="polite">
+            <div class="panel-heading"><div><p>分析结果</p><h3 id="analysisTitle">等待输入材料</h3></div><span class="analysis-status" id="analysisStatus">未运行</span></div>
+            <div class="analysis-empty" id="analysisEmpty"><div class="empty-orb" aria-hidden="true">⌁</div><strong>把一段文本放进来</strong><span>系统会返回文本质量、关键词、主体、事件线索、情绪/风险提示，并保留原文段落位置。</span></div>
+            <div id="analysisResults" hidden>
+              <div class="analysis-metrics" id="analysisMetrics"></div>
+              <div class="analysis-block"><div class="analysis-block-title"><strong>关键词</strong><span>按词频与财经词典筛选</span></div><div class="chip-list" id="analysisKeywords"></div></div>
+              <div class="analysis-block"><div class="analysis-block-title"><strong>主体与事件线索</strong><span>启发式识别，需人工确认</span></div><div class="finding-list" id="analysisFindings"></div></div>
+              <div class="analysis-block"><div class="analysis-block-title"><strong>段落检索</strong><span id="analysisParagraphCount"></span></div><div class="local-search"><input id="localSearchInput" type="search" placeholder="搜索原文段落"><button class="ghost-button" id="verifyText" type="button">验证摘录</button></div><div class="paragraph-list" id="analysisParagraphs"></div></div>
+            </div>
+          </article>
+        </div>
+        <div class="workspace-disclaimer"><strong>展示边界</strong><span>本模块不调用模型，不替代人工研判；如需 DocETL 结构化抽取、PDF 页码证据和新闻链接验证，请使用项目命令行管线。</span></div>
+      </section>
+
+      <section class="view" data-view-panel="review" aria-labelledby="reviewHeading" hidden>
+        <div class="section-intro review-intro">
+          <div><p>人工复核入口</p><h2 id="reviewHeading">待复核事件</h2><span>这些事件没有进入正式统计。当前原因均为证据摘录无法在所属文本块逐字定位。</span></div>
+          <div class="result-counter is-warning"><strong id="reviewCount">11</strong><span>条待复核</span></div>
+        </div>
+        <div class="review-notice"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 3 20h18L12 3Zm0 6v5m0 3v.01"/></svg><div><strong>状态边界</strong><p>待复核记录仅用于发现证据截断或模型改写问题，不作为系统有效事件，也不进入分布和评测指标。</p></div></div>
+        <div class="review-list" id="reviewList"></div>
+      </section>
+
+      <section class="view" data-view-panel="method" aria-labelledby="methodHeading" hidden>
+        <div class="section-intro"><div><p>实现说明</p><h2 id="methodHeading">方法、评测与边界</h2><span>把模型放在语义抽取环节，把统计、校验和状态管理留给确定性代码。</span></div></div>
+        <div class="method-grid">
+          <article class="method-story">
+            <h3>处理管线</h3>
+            <ol>
+              <li><span>01</span><div><strong>报告与新闻采集</strong><p>报告按页解析并保留页码；新闻去重后冻结快照。</p></div></li>
+              <li><span>02</span><div><strong>版本化语义抽取</strong><p>受控标签抽取公司、事件、情绪和风险，不允许自由生成类别。</p></div></li>
+              <li><span>03</span><div><strong>证据与实体校验</strong><p>证据必须在当前文本逐字命中；公司名称使用确定性别名表统一。</p></div></li>
+              <li><span>04</span><div><strong>冻结统计与离线展示</strong><p>所有数量、分布和筛选均由本地代码复算，Demo 不调用模型。</p></div></li>
+            </ol>
+          </article>
+          <article class="boundary-card">
+            <h3>评测边界</h3>
+            <strong>AI 辅助候选参考集</strong>
+            <p>60 个来源、85 条候选参考事件，状态为 <code>assistant_reviewed</code>，不是人工金标准。</p>
+            <dl><div><dt>来源完全匹配率</dt><dd>70.00%</dd></div><div><dt>事件类型宏 F1</dt><dd>74.03%</dd></div><div><dt>证据命中率</dt><dd>100%</dd></div><div><dt>可对外发布</dt><dd>否</dd></div></dl>
+            <small>指标只用于优化前后内部比较，项目仍标注为“原型”。</small>
+          </article>
+          <article class="boundary-card neutral">
+            <h3>运行信息</h3>
+            <dl id="runtimeDetails"></dl>
+            <small>第三方供应商实际费用可能与 LiteLLM 估算不同。</small>
+          </article>
+          <article class="principle-card">
+            <h3>可信展示原则</h3>
+            <ul><li>验证通过与待复核严格分开</li><li>不把公开活动推断为个人经历</li><li>不把候选参考集称为人工金标准</li><li>结果用于信息整理，不构成投资建议</li></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="drawer" id="eventDrawer" aria-labelledby="drawerTitle">
+    <div class="drawer-header"><div><p id="drawerStatus">验证通过</p><h2 id="drawerTitle">事件详情</h2></div><button class="icon-button" id="closeDrawer" type="button" aria-label="关闭事件详情"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </dialog>
+
+  <dialog class="help-dialog" id="helpDialog" aria-labelledby="helpTitle">
+    <div class="dialog-header"><div><p>Demo 使用说明</p><h2 id="helpTitle">三步完成一次证据核验</h2></div><button class="icon-button" id="closeHelp" type="button" aria-label="关闭说明"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <ol class="help-steps"><li><span>1</span><div><strong>筛选事件</strong><p>按公司、来源、事件类型、情绪、风险或年份缩小范围。</p></div></li><li><span>2</span><div><strong>打开详情</strong><p>点击表格行或“核验证据”，查看标签与来源元数据。</p></div></li><li><span>3</span><div><strong>检查原文</strong><p>报告记录显示 PDF 页码；新闻记录可打开原始链接。</p></div></li></ol>
+    <div class="help-boundary"><strong>请注意</strong><p>Demo 使用冻结数据，不会实时抓取新闻。项目结果不构成投资建议，AI 辅助候选评测数字不可表述为人工金标准结果。</p></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <script>
+window.FINANCE_DEMO_DATA={"schemaVersion":"1.0","builtAt":"2026-09-21T07:02:28Z","runId":"optimized-v1.2-throttled-final","scope":{"mode":"full","input_source_count":108,"input_sources_by_type":{"news":50,"report":58},"source_result_statuses":{"complete":76,"no_events":32},"verified_event_count":117,"review_event_count":11,"candidate_event_count":128,"event_acceptance_rate":0.9140625},"sourceYield":{"news":{"source_count":50,"verified_event_count":56,"review_event_count":1,"verified_events_per_source":1.12},"report":{"source_count":58,"verified_event_count":61,"review_event_count":10,"verified_events_per_source":1.0517241379310345}},"distributions":{"companies":[{"value":"元征科技","count":31,"share":0.26495726495726496},{"value":"中国联通","count":11,"share":0.09401709401709402},{"value":"宁德时代","count":11,"share":0.09401709401709402},{"value":"比亚迪","count":10,"share":0.08547008547008547},{"value":"上汽集团","count":9,"share":0.07692307692307693},{"value":"中国移动","count":4,"share":0.03418803418803419},{"value":"亿咖通科技","count":2,"share":0.017094017094017096},{"value":"华为","count":2,"share":0.017094017094017096},{"value":"宝马","count":2,"share":0.017094017094017096},{"value":"山东高速","count":2,"share":0.017094017094017096},{"value":"特斯拉","count":2,"share":0.017094017094017096},{"value":"百度","count":2,"share":0.017094017094017096},{"value":"Lexis","count":1,"share":0.008547008547008548},{"value":"WarmCar","count":1,"share":0.008547008547008548},{"value":"中国电信","count":1,"share":0.008547008547008548},{"value":"中国银河","count":1,"share":0.008547008547008548},{"value":"五一视界","count":1,"share":0.008547008547008548},{"value":"冀东水泥","count":1,"share":0.008547008547008548},{"value":"博世","count":1,"share":0.008547008547008548},{"value":"尼索科","count":1,"share":0.008547008547008548},{"value":"广汇汽车","count":1,"share":0.008547008547008548},{"value":"德赛西威","count":1,"share":0.008547008547008548},{"value":"无锡车城智联","count":1,"share":0.008547008547008548},{"value":"星卡科技","count":1,"share":0.008547008547008548},{"value":"智网科技","count":1,"share":0.008547008547008548},{"value":"比亚迪汽车有限公司","count":1,"share":0.008547008547008548},{"value":"永达汽车","count":1,"share":0.008547008547008548},{"value":"江苏交控","count":1,"share":0.008547008547008548},{"value":"湖北交投集团","count":1,"share":0.008547008547008548},{"value":"理想汽车","count":1,"share":0.008547008547008548},{"value":"百应控股","count":1,"share":0.008547008547008548},{"value":"福田","count":1,"share":0.008547008547008548},{"value":"联通智网科技","count":1,"share":0.008547008547008548},{"value":"腾讯","count":1,"share":0.008547008547008548},{"value":"蘑菇车联","count":1,"share":0.008547008547008548},{"value":"襄阳市汉江智行","count":1,"share":0.008547008547008548},{"value":"货拉拉","count":1,"share":0.008547008547008548},{"value":"道通科技","count":1,"share":0.008547008547008548},{"value":"阿里","count":1,"share":0.008547008547008548},{"value":"震有科技","count":1,"share":0.008547008547008548},{"value":"高德地图","count":1,"share":0.008547008547008548}],"industries":[{"value":"未标注","count":44,"share":0.37606837606837606},{"value":"汽车诊断与检测","count":31,"share":0.26495726495726496},{"value":"动力电池","count":11,"share":0.09401709401709402},{"value":"新能源汽车","count":11,"share":0.09401709401709402},{"value":"通信运营","count":11,"share":0.09401709401709402},{"value":"汽车制造","count":9,"share":0.07692307692307693}],"event_types":[{"value":"product_technology","count":30,"share":0.2564102564102564,"label_zh":"产品与技术"},{"value":"performance","count":25,"share":0.21367521367521367,"label_zh":"业绩"},{"value":"partnership_order","count":19,"share":0.1623931623931624,"label_zh":"合作与订单"},{"value":"operation_supply","count":17,"share":0.1452991452991453,"label_zh":"经营与供应链"},{"value":"other","count":14,"share":0.11965811965811966,"label_zh":"其他"},{"value":"market_price","count":7,"share":0.05982905982905983,"label_zh":"市场与价格"},{"value":"financing","count":4,"share":0.03418803418803419,"label_zh":"融资"},{"value":"merger_acquisition","count":1,"share":0.008547008547008548,"label_zh":"并购重组"}],"sentiments":[{"value":"positive","count":88,"share":0.7521367521367521,"label_zh":"正面"},{"value":"negative","count":17,"share":0.1452991452991453,"label_zh":"负面"},{"value":"neutral","count":12,"share":0.10256410256410256,"label_zh":"中性"}],"risk_types":[{"value":"none","count":99,"share":0.8461538461538461,"label_zh":"无明确风险"},{"value":"financial_performance","count":8,"share":0.06837606837606838,"label_zh":"财务与业绩"},{"value":"operational","count":8,"share":0.06837606837606838,"label_zh":"经营"},{"value":"governance","count":1,"share":0.008547008547008548,"label_zh":"治理"},{"value":"macro_policy","count":1,"share":0.008547008547008548,"label_zh":"宏观与政策"}],"risk_levels":[{"value":"none","count":99,"share":0.8461538461538461,"label_zh":"无"},{"value":"medium","count":13,"share":0.1111111111111111,"label_zh":"中"},{"value":"high","count":3,"share":0.02564102564102564,"label_zh":"高"},{"value":"low","count":2,"share":0.017094017094017096,"label_zh":"低"}],"years":[{"value":"2026","count":56,"share":0.47863247863247865},{"value":"2024","count":25,"share":0.21367521367521367},{"value":"2023","count":18,"share":0.15384615384615385},{"value":"2025","count":18,"share":0.15384615384615385}],"review_reasons":[{"value":"evidence_not_in_current_text","count":11,"share":1.0}]},"timeCoverage":{"published_at_min":"2023-04","published_at_max":"2026-09-19 12:57:05","dated_event_count":117,"undated_event_count":0},"evidence":{"verified_event_evidence_match_rate":1.0,"report_events_with_page_evidence":61,"report_event_count":61,"news_events_with_url_evidence":56,"news_event_count":56},"runtime":{"started_at":"2026-09-20T08:40:55Z","finished_at":"2026-09-20T09:20:14Z","model":"gpt-5.6-terra","prompt_version":"1.2.0","token_usage":{"openai/gpt-5.6-terra":{"prompt_tokens":132034,"completion_tokens":14924,"cached_tokens":26240}},"estimated_cost_usd":0.39592399999999994,"cost_note":"费用为 LiteLLM 估算，第三方供应商实际账单可能不同。"},"limitations":["统计仅描述当前冻结语料和验证通过事件，不构成投资建议。","11 条待复核事件未计入事件、公司、情绪和风险分布。","报告与新闻的主题、日期和公司构成不同，分布差异不能解释为因果关系。"],"events":[{"id":"event:a144b61d69574f4f0a74d1a0","status":"verified","sourceId":"news:16dab0a781ba02620780ec5e","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"宁德时代以5亿元预付款支持江西升华建设产能，并延长合作期限至2025年至2029年，后续又支付15亿元预付款锁定供应量并支持原材料建设。","evidence":"同年，宁德时代确定将以5亿元预付款支持江西升华建设产能，并将合作期限延长至2025年至2029年。按照合作安排，江西升华产能优先供给宁德时代，宁德时代每年采购量不低于其产能的80%。2025年下半年，宁德时代又支付15亿元预付款，用于锁定供应量并支持原材料建设。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609193879201177.html","publishedAt":"2026-09-19 12:57:05","title":"从深度绑定到“各有算盘” 宁德时代再度减持湖南裕能","reviewReasons":[],"validationStatus":"verified"},{"id":"event:175fe0b8ed17edac7262e621","status":"verified","sourceId":"news:16dab0a781ba02620780ec5e","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"other","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"宁德时代再度减持湖南裕能。","evidence":"标题：从深度绑定到“各有算盘” 宁德时代再度减持湖南裕能","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609193879201177.html","publishedAt":"2026-09-19 12:57:05","title":"从深度绑定到“各有算盘” 宁德时代再度减持湖南裕能","reviewReasons":[],"validationStatus":"verified"},{"id":"event:17971ae59f1fbfa4a322e988","status":"verified","sourceId":"news:ee4599563a4608b727121775","sourceType":"news","company":"尼索科","companyRaw":"尼索科","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"negative","riskType":"financial_performance","riskLevel":"medium","summary":"尼索科营收高速增长，但对大客户比亚迪深度绑定，面临议价权与回款承压的潜在经营风险。","evidence":"尼索科营收的高速增长，离不开头部车企的支撑，尤其是对大客户比亚迪的深度绑定。但这把双刃剑，也给其经营带来了潜在风险。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609193879158072.html","publishedAt":"2026-09-19 08:59:00","title":"闯过三轮问询，比亚迪供货商冲击创业板，尼索科能走多远？","reviewReasons":[],"validationStatus":"verified"},{"id":"event:33244eea1c80c3092f54c733","status":"verified","sourceId":"news:ebfcd1de851f72d2d364ba52","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"market_price","sentiment":"negative","riskType":"financial_performance","riskLevel":"high","summary":"宁德时代股价出现波动，A股连续两个交易日大幅下挫。","evidence":"近日，宁德时代股价出现波动。 9月15日至16日，其A股连续两个交易日大幅下挫。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878901572.html","publishedAt":"2026-09-18 23:02:21","title":"车企加速“去宁化”，宁德时代遭遇估值杀","reviewReasons":[],"validationStatus":"verified"},{"id":"event:842eccf6227f87f47b69ff7c","status":"verified","sourceId":"news:7a54851f65368a0e41bde564","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"operation_supply","sentiment":"negative","riskType":"operational","riskLevel":"medium","summary":"比亚迪将委托授权经销商为涉事车辆免费更换改良后的限位垫。","evidence":"比亚迪将委托授权经销商，为涉事车辆免费更换改良后的限位垫；已经完成该配件更换的车辆无需重复处理","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878856291.html","publishedAt":"2026-09-18 21:32:00","title":"比亚迪召回超18万辆秦唐车型，制动踏板限位垫存批次隐患","reviewReasons":[],"validationStatus":"verified"},{"id":"event:3399ebf7bd9541829b5fb0ae","status":"verified","sourceId":"news:f2861889a82779a11b1a9b06","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"operation_supply","sentiment":"negative","riskType":"operational","riskLevel":"medium","summary":"比亚迪备案了超18万辆汽车的召回计划。","evidence":"国家市场监督管理总局公告显示，日前，比亚迪备案了超18万辆汽车的召回计划。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878838688.html","publishedAt":"2026-09-18 21:11:25","title":"比亚迪召回超18万辆汽车","reviewReasons":[],"validationStatus":"verified"},{"id":"event:3fe2317dce183723469b531f","status":"verified","sourceId":"news:070a461ff92d8575854cb982","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"market_price","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"宁德时代于9月18日回购151.26万股A股股份，回购总金额约4.56亿元。","evidence":"公司9月18日回购151.26万股A股股份，回购价格区间为每股300.89元—302.63元，回购总金额约4.56亿元。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878809289.html","publishedAt":"2026-09-18 20:49:00","title":"宁德时代：9月18日回购151.26万股A股股份","reviewReasons":[],"validationStatus":"verified"},{"id":"event:86093c346d0cad5d36c0740f","status":"verified","sourceId":"news:257e3a008b8e1c3cae069e2b","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"market_price","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"宁德时代于2026年9月18日回购1512610股A股，支付总额456361160.73元，回购股份拟注销。","evidence":"公司于2026年9月18日在深圳证券交易所回购A股1512610股，每股最高回购价302.63元，每股最低回购价300.89元，付出的价格总额456361160.73元。回购股份拟注销，未持作库存股份。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878741152.html","publishedAt":"2026-09-18 19:17:00","title":"宁德时代：9月18日斥资4.56亿元回购151.26万股","reviewReasons":[],"validationStatus":"verified"},{"id":"event:418e5b9fd827d0b7df583d22","status":"verified","sourceId":"news:a41156850332cfb40692e7ef","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪汽车工业有限公司、比亚迪汽车有限公司","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"operation_supply","sentiment":"negative","riskType":"operational","riskLevel":"high","summary":"比亚迪汽车工业有限公司和比亚迪汽车有限公司因存在安全隐患，向国家市场监督管理总局备案了召回计划。","evidence":"日前，比亚迪汽车工业有限公司、比亚迪汽车有限公司根据《缺陷汽车产品召回管理条例》《缺陷汽车产品召回管理条例实施办法》的要求，向国家市场监督管理总局备案了召回计划。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878734123.html","publishedAt":"2026-09-18 19:10:27","title":"存在安全隐患！超18万辆比亚迪被召回","reviewReasons":[],"validationStatus":"verified"},{"id":"event:2c82e9880865f76024c581b9","status":"verified","sourceId":"news:c49e8b005bfee93ba94a1526","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪汽车工业有限公司、比亚迪汽车有限公司","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"operation_supply","sentiment":"negative","riskType":"operational","riskLevel":"medium","summary":"两家公司将委托授权经销商，为召回范围内车辆免费更换改善后的限位垫，以消除安全隐患。","evidence":"比亚迪汽车工业有限公司、比亚迪汽车有限公司将委托授权经销商，为召回范围内的车辆免费更换改善后的限位垫，以消除安全隐患。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878729572.html","publishedAt":"2026-09-18 19:03:30","title":"比亚迪召回部分唐系列、秦系列汽车","reviewReasons":[],"validationStatus":"verified"},{"id":"event:289e7c2eba2b457bd7b7c1ac","status":"verified","sourceId":"news:d35f75bd0f54e27d2ab7053a","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"other","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"比亚迪接待中金公司调研，并就二季度经营指标改善原因进行回复。","evidence":"比亚迪9月18日公告称，9月17日接待中金公司调研。接待人员包括吴越,黄悦。 公司就以下问题进行了回复：问题一:二季度经营指标改善比较突出,在行业竞争激烈的背景下,环比向好的主要驱动力是什么?","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878715433.html","publishedAt":"2026-09-18 18:36:15","title":"【调研快报】比亚迪接待中金公司调研","reviewReasons":[],"validationStatus":"verified"},{"id":"event:1adac424e56087c8b9d71ea1","status":"verified","sourceId":"news:2bcddb99884fa76869ad7a84","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"operation_supply","sentiment":"negative","riskType":"operational","riskLevel":"medium","summary":"比亚迪备案召回计划，涉及两家主体，合计召回183211辆车辆。","evidence":"比亚迪本次召回涉及两家主体，合计183211辆。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878661850.html","publishedAt":"2026-09-18 17:09:05","title":"多车企发布召回公告，比亚迪涉超18万辆老款车型","reviewReasons":[],"validationStatus":"verified"},{"id":"event:7f162c4bf51e91af3c54bc60","status":"verified","sourceId":"news:fd6ba091a4bfc0fbaed44377","sourceType":"news","company":"比亚迪汽车有限公司","companyRaw":"比亚迪汽车有限公司","stockCode":"","industry":"未标注","eventType":"operation_supply","sentiment":"negative","riskType":"operational","riskLevel":"medium","summary":"比亚迪汽车有限公司备案了部分国产汽车召回计划。","evidence":"比亚迪汽车工业有限公司、比亚迪汽车有限公司根据《缺陷汽车产品召回管理条例》《缺陷汽车产品召回管理条例实施办法》的要求，向国家市场监督管理总局备案了召回计划。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878577073.html","publishedAt":"2026-09-18 15:10:11","title":"比亚迪汽车工业有限公司、比亚迪汽车有限公司召回部分国产汽车","reviewReasons":[],"validationStatus":"verified"},{"id":"event:4327a81aa28d71c6c3982bf2","status":"verified","sourceId":"news:fd6ba091a4bfc0fbaed44377","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪汽车工业有限公司","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"operation_supply","sentiment":"negative","riskType":"operational","riskLevel":"medium","summary":"比亚迪汽车工业有限公司备案了部分国产汽车召回计划。","evidence":"比亚迪汽车工业有限公司、比亚迪汽车有限公司根据《缺陷汽车产品召回管理条例》《缺陷汽车产品召回管理条例实施办法》的要求，向国家市场监督管理总局备案了召回计划。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609183878577073.html","publishedAt":"2026-09-18 15:10:11","title":"比亚迪汽车工业有限公司、比亚迪汽车有限公司召回部分国产汽车","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9c253064e9686f982cfc41e6","status":"verified","sourceId":"news:77adad9835c63de63c362926","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"market_price","sentiment":"negative","riskType":"none","riskLevel":"none","summary":"宁德时代A股下跌0.39%，报304元/股。","evidence":"宁德时代A股跌0.39%，报304元/股。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173877598884.html","publishedAt":"2026-09-17 21:57:28","title":"450亿磷酸铁锂龙头再遭宁德时代减持","reviewReasons":[],"validationStatus":"verified"},{"id":"event:08018d958390ba02071780e6","status":"verified","sourceId":"news:77adad9835c63de63c362926","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"market_price","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"宁德时代再次减持磷酸铁锂龙头股份。","evidence":"450亿磷酸铁锂龙头再遭宁德时代减持","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173877598884.html","publishedAt":"2026-09-17 21:57:28","title":"450亿磷酸铁锂龙头再遭宁德时代减持","reviewReasons":[],"validationStatus":"verified"},{"id":"event:8c7637871a471a0ca8e05fcc","status":"verified","sourceId":"news:8a8b3bac77ae56c63fd10d90","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"operation_supply","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"宁德时代拟投资14亿元建设雅安锂盐生产基地，规划建设碳酸锂等生产及配套设施。","evidence":"雅安经济技术开发区管理委员会9月14日发布宁德时代雅安锂盐生产基地项目环境影响评价信息第一次公示。项目总投资14亿元，拟建设约4万吨碳酸锂、3万吨磷酸二氢锂、13万吨元明粉等生产厂房及生产配套附属设施。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173877432246.html","publishedAt":"2026-09-17 18:38:44","title":"拟投14亿元！宁德时代又有新动作","reviewReasons":[],"validationStatus":"verified"},{"id":"event:d8fe7c5959946a82428298c0","status":"verified","sourceId":"news:0c22852f9b7b5d16e2fd269b","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"operation_supply","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"宁德时代拟投资14亿元建设雅安锂盐生产基地，规划年产约4万吨碳酸锂、3万吨磷酸二氢锂及13万吨元明粉。","evidence":"雅安经济技术开发区管理委员会近日发布宁德时代雅安锂盐生产基地项目环境影响评价信息第一次公示。项目总投资14亿元，拟建设年产约4万吨碳酸锂、3万吨磷酸二氢锂及13万吨元明粉产能。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173877357243.html","publishedAt":"2026-09-17 16:53:40","title":"宁德时代，14亿新投资！","reviewReasons":[],"validationStatus":"verified"},{"id":"event:5b57fadea18839245fb38a9c","status":"verified","sourceId":"news:a1206207281bddd3c2bbb007","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"豆包座舱助手已与上汽集团达成合作。","evidence":"目前，豆包座舱助手已与上汽集团达成合作，首款搭载豆包座舱助手的车型——荣威家越07即将开启预售，上汽奥迪相关车型也将于年内亮相。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173877258048.html","publishedAt":"2026-09-17 14:45:14","title":"豆包座舱助手发布，与上汽集团达成合作，首款“豆包汽车”是它……","reviewReasons":[],"validationStatus":"verified"},{"id":"event:d3b51ec0637912046ff475e4","status":"verified","sourceId":"news:666813f95520b34e9b8a982f","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"比亚迪宣布2027款元UP飞驰版上市，新增501km长续航，限时售价6.98万元起。","evidence":"9月17日，比亚迪宣布，2027款元UP飞驰版上市，新增501km长续航，限时售价6.98万元起。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173877120768.html","publishedAt":"2026-09-17 10:37:25","title":"比亚迪2027款元UP飞驰版上市","reviewReasons":[],"validationStatus":"verified"},{"id":"event:3181c2bc09f0a6c3ef3c62c5","status":"verified","sourceId":"news:952e53bda16c92c9842aff24","sourceType":"news","company":"比亚迪","companyRaw":"比亚迪","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"比亚迪方程S系列车辆搭载第二代刀片电池，并通过边闪充边针刺、多场景短路等测试。","evidence":"车辆搭载比亚迪第二代刀片电池，经过边闪充边针刺、多场景短路等测试。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173877412932.html","publishedAt":"2026-09-17 09:23:58","title":"比亚迪运动轿车全能新作方程S系列上市","reviewReasons":[],"validationStatus":"verified"},{"id":"event:eacdea3ae874f81fc8bec586","status":"verified","sourceId":"news:5d65f7274c9d7aa23bc4d1f6","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"宁德时代上半年实现净利润432.84亿元，平均每天进账近2.4亿元。","evidence":"上半年赚了432.84亿元，平均每天进账近2.4亿元","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173876503193.html","publishedAt":"2026-09-17 08:30:00","title":"宁德时代的“去宁化”之问","reviewReasons":[],"validationStatus":"verified"},{"id":"event:37b2a90accb6d716f370600a","status":"verified","sourceId":"news:5d65f7274c9d7aa23bc4d1f6","sourceType":"news","company":"宁德时代","companyRaw":"宁德时代","stockCode":"300750.SZ","industry":"动力电池","eventType":"market_price","sentiment":"negative","riskType":"financial_performance","riskLevel":"medium","summary":"宁德时代A股股价重挫超6%并创近一年新低，A股市值缩水至1.4万亿元，A+H股总市值跌破1.5万亿元。","evidence":"9月15日，宁德时代A股重挫超6%，创近一年股价新低，A股市值缩水至1.4万亿元。港股同步跳水，收盘跌超6%。至此，宁德时代A+H股总市值跌破1.5万亿元。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609173876503193.html","publishedAt":"2026-09-17 08:30:00","title":"宁德时代的“去宁化”之问","reviewReasons":[],"validationStatus":"verified"},{"id":"event:b967078363a6e9b37a7718ce","status":"verified","sourceId":"news:b08fc113764690e027c6307b","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通携AI安全系列产品和联通墨攻3.0平台亮相国家网络安全宣传周，展示其网络安全创新实践成果。","evidence":"中国联通创新提出AI时代安全“新范式、新规则、新动能”发展理念，以“算安启新程，智链护未来”为主题，打造算网安全、信息安全、数据安全、人工智能安全等特色展区，携AI安全系列产品、联通墨攻3.0平台等展品精彩亮相，全面展示中国联通作为网络安全现代产业链链长的创新实践成果。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609143873438237.html","publishedAt":"2026-09-14 16:12:37","title":"国家网络安全宣传周丨中国联通以“新范式、新规则、新动能”护航算网安全","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9736e13c6553e3ffe4d9d426","status":"verified","sourceId":"news:f1b2e6e89963a16ceba37bea","sourceType":"news","company":"震有科技","companyRaw":"震有科技","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"震有科技联合中国联通及产业伙伴共同发布卫星互联网安全“天枢”行动计划，提出四层纵深防御体系。","evidence":"近日，在2026年中国联通合作伙伴大会上，震有科技联合中国联通、宁波市人民政府及产业伙伴共同发布卫星互联网安全“天枢”行动计划，提出四层纵深防御体系，试图在卫星互联网的安全空白地带率先划出一道防线。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609143873272657.html","publishedAt":"2026-09-14 12:05:43","title":"卫星互联网竞速下的安全考题：震有科技联合中国联通发布“天枢”计划，提出四层防御","reviewReasons":[],"validationStatus":"verified"},{"id":"event:592763a4b954913393736f0e","status":"verified","sourceId":"news:ae1539e19435b64a9dab348f","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"market_price","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"上汽集团股价上涨5.11%，在成分股中领涨。","evidence":"上汽集团领涨5.11%","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609143873024374.html","publishedAt":"2026-09-14 09:31:17","title":"上证180指数下跌1.18%，上证180ETF平安(530280)成分股上汽集团领涨5.11%","reviewReasons":[],"validationStatus":"verified"},{"id":"event:2dd2f57cbc7dd82b81bedc99","status":"verified","sourceId":"news:b3d6d2f87e992f9672efa566","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通在上海举办合作伙伴大会，发布联通智算云8.0、元景词元运营分发平台等新成果。","evidence":"中国联通刚刚在上海举办了中国联通合作伙伴大会，发布了联通智算云8.0、元景词元运营分发平台等新成果","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609123872740218.html","publishedAt":"2026-09-12 18:34:00","title":"中国联通副总经理朱汉武：算网筑基，智启新程丨2026中国算力大会","reviewReasons":[],"validationStatus":"verified"},{"id":"event:e02754d8912c4bfeaffff2fa","status":"verified","sourceId":"news:f7cfaf0dc909df5186bd4f78","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"other","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"中国联通完成大规模机构改革，并在改革后举办首场大型活动。","evidence":"本次合作伙伴大会也是中国联通大规模机构改革后举办的首场大型活动。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609113872335373.html","publishedAt":"2026-09-11 21:34:51","title":"从“六算协同”到AI终端生态 中国联通多位高管详解数智发展新棋局","reviewReasons":[],"validationStatus":"verified"},{"id":"event:59fa6c8b9027055973ad2031","status":"verified","sourceId":"news:594f45df218988272df111c5","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通在2026中国联通合作伙伴大会展览中集中展示全栈AI创新成果和数字技术融合创新实践。","evidence":"9月9日，2026中国联通合作伙伴大会展览举办。展览以“向智同行连接算力新生态”为主题，聚焦“连接”“算力”“服务”“安全”四大核心赛道，集中展示中国联通AI创新成果和数字技术融合创新实践。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609113872335263.html","publishedAt":"2026-09-11 21:03:00","title":"中国联通合作伙伴大会展出全栈AI创新成果","reviewReasons":[],"validationStatus":"verified"},{"id":"event:1e86c5fa3a2c48f84f32ad21","status":"verified","sourceId":"news:726338983c3e70c281ec396e","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"other","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"上汽集团于4月1日至8月31日接待中金证券等42家机构调研。","evidence":"上汽集团9月11日公告称，4月1日至8月31日接待中金证券等42家机构调研。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609113872061226.html","publishedAt":"2026-09-11 16:05:03","title":"【调研快报】上汽集团接待中金证券等42家机构调研","reviewReasons":[],"validationStatus":"verified"},{"id":"event:e004ead0f4cd7304172343da","status":"verified","sourceId":"news:c136576d19b23380134f6afa","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通发布AIDN创新架构，并计划升级算网调度能力和产品服务形态。","evidence":"中国联通将以AIDN创新架构（AI定义网络）为指引，向“智”升级，持续做大连接规模、提升连接密度；升级算网调度能力、创新产品服务形态。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609113872043566.html","publishedAt":"2026-09-11 15:36:25","title":"中国联通发布AIDN创新架构 网络从“连人连物”迈向“连接智能体”","reviewReasons":[],"validationStatus":"verified"},{"id":"event:d53dd3bda4a77af2673756fd","status":"verified","sourceId":"news:91994435d7f3189e47f524d0","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通正由传统管道提供商向数智综合服务商转型，并将新一代通信网和算力网作为主责主业。","evidence":"中国联通正实现由“传统管道提供商”向“数智综合服务商”的蜕变，公司将聚焦“连接”“算力”“服务”“安全”四大核心赛道，把新一代通信网和算力网作为主责主业。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609113871914070.html","publishedAt":"2026-09-11 12:48:12","title":"中国联通“十五五”时期预计撬动千亿级算力网投资","reviewReasons":[],"validationStatus":"verified"},{"id":"event:b71d40313e59e179ed33ac7c","status":"verified","sourceId":"news:d8587f61f5aa2422db0000e1","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"other","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"中国联通董事长董昕在合作伙伴大会上提出“唯大不阻、唯快不破、唯合不摧”的发展新范式。","evidence":"主论坛上，中国联通董事长董昕提出“唯大不阻、唯快不破、唯合不摧”发展新范式。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609113871911293.html","publishedAt":"2026-09-11 11:30:00","title":"中国联通董事长董昕：要避开同质化竞争","reviewReasons":[],"validationStatus":"verified"},{"id":"event:f35e47a5b6b04d8d6c17dbc6","status":"verified","sourceId":"news:a4190ffa9ef616e819ff4647","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通正式发起“算力价值共创行动计划”。","evidence":"会上，中国联通正式发起“算力价值共创行动计划”，海光信息等参与计划发布。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609103870614952.html","publishedAt":"2026-09-10 16:39:51","title":"中国联通发起“算力价值共创行动计划”","reviewReasons":[],"validationStatus":"verified"},{"id":"event:e608203fa54463e6697524ca","status":"verified","sourceId":"news:98a13685c8d29f83c36b37bf","sourceType":"news","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通以四大赛道为业务内核，拓展升级为服务、科创、产品、廉洁四大图谱，构建智能时代发展体系。","evidence":"在以“向智同行连接算力新生态”为主题的2026中国联通合作伙伴大会上，中国联通完成一次重要的战略升维：以“连接”“算力”“服务”“安全”四大赛道为业务内核，向外拓展升级为服务图谱、科创图谱、产品图谱、廉洁图谱四大图谱。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609103870508010.html","publishedAt":"2026-09-10 14:50:00","title":"从四大赛道到四大图谱，中国联通构建智能时代发展完整体系丨2026中国联通合作伙伴大会","reviewReasons":[],"validationStatus":"verified"},{"id":"event:671b19d5ae3277182ee7f444","status":"verified","sourceId":"news:7106e41de8edc34fd0dcf8f3","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"上汽集团密集推出新产品，为“金九银十”消费旺季蓄力。","evidence":"蓄力冲刺“金九银十”，上汽集团“密集上新”","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609103870404654.html","publishedAt":"2026-09-10 11:38:23","title":"蓄力冲刺“金九银十”，上汽集团“密集上新”","reviewReasons":[],"validationStatus":"verified"},{"id":"event:081ade8cdabe4f16d280b18a","status":"verified","sourceId":"news:62df88e630241f613dc7de4a","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"上汽集团与奥迪股份公司、大众汽车（中国）投资有限公司共同投资成立科技新公司并开展多项AI业务。","evidence":"企查查股权穿透显示，该公司由上汽集团、奥迪股份公司、大众汽车（中国）投资有限公司共同持股。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609043865428451.html","publishedAt":"2026-09-04 16:09:00","title":"上汽集团、大众汽车投资成立科技新公司 含多项AI业务","reviewReasons":[],"validationStatus":"verified"},{"id":"event:6da4ceef9fc533bfb4f22ea9","status":"verified","sourceId":"news:208d794cd55ae23f0fa4b1a2","sourceType":"news","company":"上汽集团","companyRaw":"上海汽车集团股份有限公司","stockCode":"600104.SH","industry":"汽车制造","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"上海汽车集团股份有限公司与奥迪股份有限公司、大众汽车（中国）共同成立奥迪（上海）科技有限公司，注册资本6.94亿元人民币。","evidence":"天眼查App显示，近日，奥迪（上海）科技有限公司成立，法定代表人为MATTHIAS JOHANN PFISTER，注册资本6.94亿元人民币，经营范围包括汽车零部件研发、汽车零配件批发、汽车零配件零售等。股东信息显示，该公司由上海汽车集团股份有限公司、奥迪股份有限公司、大众汽车（中国","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609033864026158.html","publishedAt":"2026-09-03 15:40:38","title":"上汽集团、奥迪、大众汽车在上海成立合资公司 注册资本6.94亿元","reviewReasons":[],"validationStatus":"verified"},{"id":"event:e947d996af1187aa260f41e7","status":"pending_review","sourceId":"news:a6bb48cac68916bae5e1d24c","sourceType":"news","company":"上汽集团","companyRaw":"上海汽车集团股份有限公司","stockCode":"600104.SH","industry":"汽车制造","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"与奥迪股份有限公司共同成立奥迪（上海）科技有限公司，注册资本为6.94亿元人民币。","evidence":"近日，奥迪（上海）科技有限公司成立，法定代表人为MATTHIASJOHANNPFISTER，注册资本6.94亿人民币，经营范围包括汽车零部件研发、汽车零配件批发、汽车零配件零售等。股东信息显示，该公司由上海汽车集团股份有限公司、奥迪股份有限公司。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609033864015387.html","publishedAt":"2026-09-03 15:22:00","title":"上汽集团、奥迪、大众汽车在上海成立合资公司 注册资本6.94亿","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:6cc6460545bd205efa317a5b","status":"verified","sourceId":"news:f06ace9b4588aaa7283f96ff","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"上汽集团与院校联合培养的四位技能健儿在车身修理项目中累计获得三金一银。","evidence":"从第43届世赛至今，由上汽集团与院校联合培养的罗良、杨山巍、徐澳门、朱俊峰四位技能健儿，在车身修理项目中累计斩获 “三金一银” 的佳绩。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609023862609154.html","publishedAt":"2026-09-02 11:28:05","title":"倒计时20天，上汽集团全面冲刺世界技能大赛服务保障","reviewReasons":[],"validationStatus":"verified"},{"id":"event:45e81d9462c4bad609c73d58","status":"verified","sourceId":"news:473d9adc650bdb3d59822b81","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"上汽集团作为本届大赛国家战略合作伙伴，服务保障与展示筹备工作进入冲刺阶段。","evidence":"作为本届大赛“国家战略合作伙伴”，上汽集团各项服务保障与展示筹备工作已全面进入冲刺阶段。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609023862605852.html","publishedAt":"2026-09-02 11:17:07","title":"世赛开幕进入倒计时，“国家战略合作伙伴”上汽集团肩负使命全程护航","reviewReasons":[],"validationStatus":"verified"},{"id":"event:22c4755cd445a1bd25a16ec3","status":"verified","sourceId":"news:2d9aa15d2d9ba25f550af5ca","sourceType":"news","company":"上汽集团","companyRaw":"上汽集团","stockCode":"600104.SH","industry":"汽车制造","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"上汽集团8月整车销售35.7万辆，1-8月累计销售274.1万辆，继续位居中国汽车行业首位。","evidence":"8月上汽集团整车销售35.7万辆，1-8月累计销售274.1万辆，继续位居中国汽车行业首位。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202609013861612751.html","publishedAt":"2026-09-01 18:29:00","title":"上汽集团1-8月累计销售274.1万辆","reviewReasons":[],"validationStatus":"verified"},{"id":"event:a99b328f231f4b44f645205a","status":"verified","sourceId":"news:6f359d350582c4e2053acabf","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"negative","riskType":"financial_performance","riskLevel":"medium","summary":"元征科技披露2026年中期报告，净利润为1.75亿元，同比下降10.28%。","evidence":"元征科技：2026年中期净利润1.75亿元 同比下降10.28%","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202608113837867812.html","publishedAt":"2026-08-11 16:05:06","title":"元征科技：2026年中期净利润1.75亿元 同比下降10.28%","reviewReasons":[],"validationStatus":"verified"},{"id":"event:28cb2a76a89eca1251af6c3c","status":"verified","sourceId":"news:dac40a288b8e6db5c7fe3bd3","sourceType":"news","company":"百应控股","companyRaw":"百应控股","stockCode":"","industry":"未标注","eventType":"financing","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"公司拟与龙岩宏腾订立售后回租融资租赁协议，涉及交易金额2500万元人民币。","evidence":"百应控股：拟与龙岩宏腾订立售后回租融资租赁协议涉及交易金额2500万元人民币","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202608103836889589.html","publishedAt":"2026-08-10 21:29:00","title":"希迪智驾上半年营收近翻倍、净亏损收窄至1.13亿元丨港股公告精选","reviewReasons":[],"validationStatus":"verified"},{"id":"event:6479fdee5a058b632b57b6e1","status":"verified","sourceId":"news:dac40a288b8e6db5c7fe3bd3","sourceType":"news","company":"五一视界","companyRaw":"五一视界","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"negative","riskType":"financial_performance","riskLevel":"medium","summary":"公司上半财年净亏损7010.00万元。","evidence":"五一视界：上半财年净亏损7010.00万元","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202608103836889589.html","publishedAt":"2026-08-10 21:29:00","title":"希迪智驾上半年营收近翻倍、净亏损收窄至1.13亿元丨港股公告精选","reviewReasons":[],"validationStatus":"verified"},{"id":"event:60e2d2b1a24a86f6add0bde3","status":"verified","sourceId":"news:dac40a288b8e6db5c7fe3bd3","sourceType":"news","company":"中国银河","companyRaw":"中国银河","stockCode":"","industry":"未标注","eventType":"other","sentiment":"neutral","riskType":"governance","riskLevel":"low","summary":"公司执行董事屈弯萍辞去相关职位。","evidence":"中国银河：屈弯萍辞去执行董事等职位","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202608103836889589.html","publishedAt":"2026-08-10 21:29:00","title":"希迪智驾上半年营收近翻倍、净亏损收窄至1.13亿元丨港股公告精选","reviewReasons":[],"validationStatus":"verified"},{"id":"event:cacd832433bef8ec8cae0660","status":"verified","sourceId":"news:81c7d742241b30ffa45b3de8","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技将于2026年9月18日派发截至2026年6月30日止六个月的中期股息，每股0.335港元。","evidence":"元征科技（02488.HK）公告，公司将于2026年9月18日派发截至2026年6月30日止六个月之中期股息，每股派发0.335港元。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202608103836701814.html","publishedAt":"2026-08-10 17:30:04","title":"元征科技：9月18日将派发股息0.335港元/股","reviewReasons":[],"validationStatus":"verified"},{"id":"event:bbb6aa3e85876f3ddc0bdb5e","status":"verified","sourceId":"news:91696009e89a3a55533956b4","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"negative","riskType":"financial_performance","riskLevel":"medium","summary":"元征科技发布2026年中期业绩，营业收入同比增长9%至10.71亿元，但净利润同比下降10%至1.77亿元。","evidence":"8月10日，元征科技（02488）发布2026年中期业绩公告，公司营业收入为10.71亿元，同比增长9%；净利润为1.77亿元，同比下降10%。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202608103836691960.html","publishedAt":"2026-08-10 17:21:00","title":"元征科技：上半年净利润达1.77亿元 同比降10%","reviewReasons":[],"validationStatus":"verified"},{"id":"event:26f3886731c450d13eb8fde8","status":"verified","sourceId":"news:91696009e89a3a55533956b4","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"financing","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技董事会决定派发中期股息，每股0.29元。","evidence":"每股盈利为0.426元，董事会决定派发中期股息每股0.29元。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202608103836691960.html","publishedAt":"2026-08-10 17:21:00","title":"元征科技：上半年净利润达1.77亿元 同比降10%","reviewReasons":[],"validationStatus":"verified"},{"id":"event:8f322877a4f321dc8b185ce5","status":"verified","sourceId":"news:172368da5f35339fb81ffc71","sourceType":"news","company":"道通科技","companyRaw":"道通科技","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"道通科技正在尝试利用AI大模型，为汽车后市场智能诊断寻找新的解决方案。","evidence":"在这场结构性转变中，星卡科技、道通科技、元征科技等中国企业正在尝试用AI大模型，为这门古老的跨境生意寻找新的答案。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202607013790491169.html","publishedAt":"2026-07-01 20:01:00","title":"从给汽车“拍CT”到“出药方”，AI改变这门跨境生意","reviewReasons":[],"validationStatus":"verified"},{"id":"event:ed8b9e506338ef59532b8cc7","status":"verified","sourceId":"news:172368da5f35339fb81ffc71","sourceType":"news","company":"星卡科技","companyRaw":"星卡科技","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"星卡科技正在尝试利用AI大模型，为汽车后市场智能诊断寻找新的解决方案。","evidence":"在这场结构性转变中，星卡科技、道通科技、元征科技等中国企业正在尝试用AI大模型，为这门古老的跨境生意寻找新的答案。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202607013790491169.html","publishedAt":"2026-07-01 20:01:00","title":"从给汽车“拍CT”到“出药方”，AI改变这门跨境生意","reviewReasons":[],"validationStatus":"verified"},{"id":"event:a7d074f9218622031009fa2f","status":"verified","sourceId":"news:172368da5f35339fb81ffc71","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技正在尝试利用AI大模型，为汽车后市场智能诊断寻找新的解决方案。","evidence":"在这场结构性转变中，星卡科技、道通科技、元征科技等中国企业正在尝试用AI大模型，为这门古老的跨境生意寻找新的答案。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202607013790491169.html","publishedAt":"2026-07-01 20:01:00","title":"从给汽车“拍CT”到“出药方”，AI改变这门跨境生意","reviewReasons":[],"validationStatus":"verified"},{"id":"event:dbfa7dac7136cd564d034aaa","status":"verified","sourceId":"news:1dca6d176672828e1c25afbf","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技完成H股全流通，1.94亿股未上市股份转换为H股并将于5月11日在联交所上市。","evidence":"元征科技（02488）发布公告，宣布完成H股全流通，合共1.94亿股未上市股份已于2026年5月8日成功转换为H股，转换后的H股将于2026年5月11日上午9时正开始在联交所上市。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202605083731520678.html","publishedAt":"2026-05-08 16:45:00","title":"元征科技完成H股全流通：1.94亿股将于5月11日上市","reviewReasons":[],"validationStatus":"verified"},{"id":"event:6804d649f012766f8f10bc14","status":"verified","sourceId":"news:0d633215657967d997eb1662","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技2025年实现营业收入21.10亿元人民币，年内溢利3.49亿元人民币。","evidence":"截至2025年12月31日止年度，公司营业收入为21.10亿元人民币；年内溢利为3.49亿元人民币。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202604023693852048.html","publishedAt":"2026-04-02 23:14:21","title":"元征科技：2025年净利润3.49亿元人民币","reviewReasons":[],"validationStatus":"verified"},{"id":"event:d0057f1e0fed5aaed6960032","status":"verified","sourceId":"news:83ec7ffbac06377f20470e38","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2025年净利润为3.44亿元，同比增长1.4%。","evidence":"元征科技：2025年净利润3.44亿元 同比增长1.4%","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202603253684395066.html","publishedAt":"2026-03-25 21:54:57","title":"元征科技：2025年净利润3.44亿元 同比增长1.4%","reviewReasons":[],"validationStatus":"verified"},{"id":"event:fe38f3364fa9c3050416185a","status":"verified","sourceId":"news:7109ea320604a017a17f4a83","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司将于2026年5月22日派发截至2025年12月31日止年度的末期股息，每股0.466港元。","evidence":"元征科技（02488.HK）公告，公司将于2026年5月22日派发截至2025年12月31日止年度的末期股息，每股派发0.466港元。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202603253684197529.html","publishedAt":"2026-03-25 18:25:48","title":"元征科技：5月22日派发股息0.466港元/股","reviewReasons":[],"validationStatus":"verified"},{"id":"event:185a6324da93b0a1ebfb1480","status":"verified","sourceId":"news:47fe182b89d2756eac77a76c","sourceType":"news","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司将于2026年5月22日派发截至2025年12月31日止年度末期股息，每股0.466港元。","evidence":"元征科技（02488.HK）公告，公司将于2026年5月22日派发截至2025年12月31日止年度的末期股息，每股派发0.466港元。","pages":[],"evidenceUrl":"http://finance.eastmoney.com/a/202603253684192651.html","publishedAt":"2026-03-25 18:12:00","title":"元征科技：5月22日派发股息0.466港元/股","reviewReasons":[],"validationStatus":"verified"},{"id":"event:b27622b26ad6c12735b5ebef","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0018","sourceType":"report","company":"高德地图","companyRaw":"高德地图","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2024年第一季度月活跃用户突破8亿。","evidence":"据QuestMobile 数据，高德地图在2024 年第一季度的月活跃用户突破了8 亿。","pages":[35],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:1c8c73954693f099b7fffc50","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0018","sourceType":"report","company":"货拉拉","companyRaw":"货拉拉","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2024年上半年促成订单超过3.38亿笔，2023年月活跃司机用户超过100万。","evidence":"根据QuestMobile 的数据，货拉拉在2023 年的月活跃司机用户就超过了100 万，2024 年上半年促成订单超3.38 亿笔。","pages":[36],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:ce4622bf7ce69a400852ce23","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0020","sourceType":"report","company":"襄阳市汉江智行","companyRaw":"襄阳市汉江智行","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"利用车联网路侧感知设备数据分析路口排队长度并优化红绿灯配时，提升重点路口交通通行效率。","evidence":"襄阳市汉江智行作为城市云控平台的建设方，利用车联网路侧感知设备的数据，分析重点路口不同方向排队长度等信息，计算优化路口红绿灯配时的策略，实现了一批重点路口的交通通行效率大幅提升。","pages":[39],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9ef39af8c7ca9f91788e3524","status":"pending_review","sourceId":"connected-vehicle-data-elements-2025:c0012","sourceType":"report","company":"苏州智行众维科技有限公司","companyRaw":"苏州智行众维科技有限公司","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"苏州智行众维科技有限公司开展车辆环境感知数据价值再挖掘探索，构建仿真场景数据库以支持自动驾驶算法训练和测试验证。","evidence":"苏州智行众维科技有限公司和51WORLD 等仿真企业、清华等高等院校、北京车网等“车路云一体化”示范区运营主体均在开展相关探索，依托大模型和生成式人工智能等技术，将来自车端的环境感知、车辆运行、感知决策等数据构建为仿真场景数据库","pages":[],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:c7c52972026b839fe2ef455f","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0022","sourceType":"report","company":"联通智网科技","companyRaw":"联通智网科技","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"联通智网科技利用大数据优化充电桩选址并提供定制化车险服务，以增强车企客户体验。","evidence":"如联通智网科技利用大数据提供充电桩选址优化、定制化车险服务等，增强了车企客户体验。","pages":[43],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9bb3f4cb41ba50a938ae57f9","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0012","sourceType":"report","company":"福田","companyRaw":"福田","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"福田利用商用车驾驶行为、位置和实时油耗等数据开展驾驶员行为分析与车辆监控管理，优化车辆调度并降低成本。","evidence":"福田等部分企业利用其商用车的驾驶行为、位置信息、实时油耗等数据来进行驾驶员行为分析和车辆监控管理，从而在物流企业端实现车辆调度优化，在驾驶员端给出驾驶安全性建议和燃油效率优化建议，以进一步降低成本。","pages":[24],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9edfeb4b0cd803255aa49717","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0016","sourceType":"report","company":"湖北交投集团","companyRaw":"湖北交投集团","stockCode":"","industry":"未标注","eventType":"financing","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"湖北交投集团两项数据产品上架湖北省数据流通交易平台，并获得兴业银行武汉分行1亿元授信。","evidence":"湖北交投集团两项数据产品成功上架“湖北省数据流通交易平台”，兴业银行武汉分行据此向湖北交投集团授信1 亿元13。","pages":[32],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:b807a39df58a481b84a39f0d","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0014","sourceType":"report","company":"江苏交控","companyRaw":"江苏交控","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"江苏交控通过“AI平方”多源感知监测与主动管控系统提升感知数据质量，并推动沪宁高速通行效率和速度提升。","evidence":"江苏交控通过“AI 平方”多源感知监测与主动管控系统获取交通流数据，突破传统单一厂商AI 多业务场景识别能力不均衡的瓶颈，实现感知数据质量显著提升，沪宁高速车道管控年均开放1500 余小时，高峰流量时段增加车辆通过近60 万辆，通行流量效率提升11%，通行速度提升19%10。","pages":[29],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:85876147bbfd82e8b5073443","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0019","sourceType":"report","company":"无锡车城智联","companyRaw":"无锡车城智联","stockCode":"","industry":"未标注","eventType":"operation_supply","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"无锡车城智联基于云控基础平台运营无人驾驶小巴，已开通6条线路、超过50辆小巴，并支持线路规划优化、远程监控及应急接管。","evidence":"无锡车城智联基于云控基础平台运营无人驾驶小巴，目前已开通6 条线路超50 辆小巴，可实现云控基础平台对小巴的线路规划和优化、远程监控及应急接管等功能，保障运营安全可靠","pages":[38],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:8f1e78bafaa0424b99a4ccb5","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0015","sourceType":"report","company":"山东高速","companyRaw":"山东高速","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"山东高速探索通过自主研发APP和小程序向用户推送施工养护、交通事故及车道开放等高速公路信息。","evidence":"山东高速、成宜高速、沪杭甬高速等探索通过自主研发APP、小程序等技术手段将计划性施工养护信息、感知类交通事故信息、动态应急车道开放情况、收费站开关闭情况等信息触达用户。","pages":[31],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:5305a3320b4be6ae4ff49871","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0016","sourceType":"report","company":"山东高速","companyRaw":"山东高速","stockCode":"","industry":"未标注","eventType":"financing","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"山东高速实现首批数据资产入账入表，并办理3000万元数据知识产权质押融资业务。","evidence":"山东高速实现首批数据资产入账入表，成功办理3000 万元数据知识产权质押融资业务12；","pages":[32],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9bd1e3bd36b2fcddc954e17f","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0012","sourceType":"report","company":"宝马","companyRaw":"宝马","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"宝马发起推进Catena-X汽车数据空间建设，探索搭建端到端的汽车数据流通生态系统。","evidence":"例如，宝马等企业发起推进Catena-X 汽车数据空间建设，探索搭建一个端到端的汽车数据流通生态系统，涵盖汽车生产企业、零部件供应商、服务商等，实现不同厂商间数据交换","pages":[25],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:19cb180f006ef0d6a434c907","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0020","sourceType":"report","company":"博世","companyRaw":"博世","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"基于车载OBD数据探测路面状态，分析测算积水、结冰等异常路况并反馈至云控基础平台形成预警信息。","evidence":"博世研究基于车载在线诊断设备（OBD）数据探测路面状态，利用车载OBD 通过高采样率获取到的扭矩分配、轮胎打滑等数据，可分析测算路面积水、结冰等异常路况，并将分析结果反馈至云控基础平台用于形成预警类信息。","pages":[39],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:41c4667eff6f11fd680b8884","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0022","sourceType":"report","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国联通在苏州开展“一网统管城市交通专题”项目，分析网络信令和相关部门数据并发布拥堵预警。","evidence":"中国联通在苏州开展“一网统管城市交通专题”项目，通过分析4G/5G 网络信令来获取用户位置，并汇聚交警、城建等部门数据，分析具体区域、路段等道路的拥堵程度及变化趋势，面向车联网用户发布拥堵路段预警等应用。","pages":[43],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:b29d08629857ca9ad70d94a1","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0021","sourceType":"report","company":"中国移动","companyRaw":"中国移动","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国移动通过OneTraffic智慧交通平台提供智能网联服务，并与多家车企合作提供连接管理和流量运营能力。","evidence":"如中国电信的车联网运营服务、中国移动OneTraffic 智慧交通平台的智能网联服务、中国联通5G 车联网联接服务等，与一汽、上汽、长安、大众、奥迪等车企广泛合作，提供eSIM 码号切换、码号生命周期管理等连接管理能力，以及内容计费、流量包再分配等流量运营能力。","pages":[42],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:b1e0141677300d70b9ad207b","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0021","sourceType":"report","company":"中国移动","companyRaw":"中国移动","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国移动通过磐舟DevSecOps平台的AIOps智能运维等能力提升网络优化，需求交付周期提升50%、系统进程故障自愈率达到90%。","evidence":"例如，中国移动通过磐舟DevSecOps 平台的AIOps 智能运维等交付能力，提升网络优化能力，使得需求交付周期提升50%，系统进程故障自愈率达到90%，问题解决周期改善49%16。","pages":[41],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:4e401098b18b1778150c7071","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0022","sourceType":"report","company":"中国移动","companyRaw":"中国移动","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国移动利用梧桐大数据平台与长安、吉利等车企合作，评定存量客户二次购车意愿并开展精准营销。","evidence":"中国移动利用梧桐大数据平台，与长安、吉利等车企合作，对存量客户二次购车的意愿和需求进行评定，并通过各种活动对高意向客户进行重点营销，以提升营销效果和客户忠诚度。","pages":[43],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:ce125ff46e859f7fa07471de","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0019","sourceType":"report","company":"WarmCar","companyRaw":"WarmCar","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"WarmCar获得柳州车联网先导区提供的数据，并向租客提供包含交通信号灯状态在内的行驶路线信息服务。","evidence":"柳州车联网先导区将数据提供至汽车分时租赁品牌WarmCar，在车内向租客提供行驶路线的交通信号灯状态等信息服务","pages":[37],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:62aa9deddc2739848a7c74d5","status":"verified","sourceId":"connected-vehicle-data-elements-2025:c0011","sourceType":"report","company":"Lexis","companyRaw":"Lexis","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"Lexis基于车辆行驶轨迹、里程、驾驶行为和维保记录等数据建立驾驶行为安全评估模型及评分体系，为保险车险定价提供参考。","evidence":"Lexis 等部分商业资讯服务商基于车辆行驶轨迹、车辆里程统计、驾驶行为、车辆维保记录等数据，建立了驾驶行为安全评估模型和驾驶行为安全评分体系，保险公司在通过查询接口获取到对应分数后将其作为车联网保险定价的参考","pages":[23],"evidenceUrl":"","publishedAt":"2025-01","title":"车联网数据要素赋能研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:29b26ffc8e50f139d9f9a3ba","status":"verified","sourceId":"launch-tech-2024-10-11:c0011","sourceType":"report","company":"理想汽车","companyRaw":"理想汽车","stockCode":"02015.HK / LI.US","industry":"新能源汽车","eventType":"operation_supply","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2021年已设立82家直营维修中心，覆盖全国79个城市。","evidence":"2021 年，理想汽车已有82 家直营维修中心，覆盖全国79 个城市。","pages":[13],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:da6a03123ba75393e4250e32","status":"verified","sourceId":"launch-tech-2024-10-11:c0011","sourceType":"report","company":"特斯拉","companyRaw":"特斯拉","stockCode":"","industry":"未标注","eventType":"operation_supply","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"截至2022年底在中国大陆开设16家直营钣喷中心和148家授权钣喷中心。","evidence":"截至2022 年底特斯拉已在中国大陆开设16 家直营钣喷中心，覆盖14 座城市；授权钣喷中心开设148 家，覆盖103 座城市。","pages":[13],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:cc81a57233f4992ca0491767","status":"verified","sourceId":"launch-tech-2024-10-11:c0011","sourceType":"report","company":"永达汽车","companyRaw":"永达汽车","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"negative","riskType":"financial_performance","riskLevel":"medium","summary":"2023年上半年新车销售利润率同比大幅下滑85.5%。","evidence":"2023 年上半年，广汇汽车和永达汽车，这两大经销商集团的新车销售的利润率在同期也均有大幅度的下滑，分别同比下跌60.7%和85.5%。","pages":[13],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:0ec31ec39327f43d07acf522","status":"verified","sourceId":"launch-tech-2024-10-11:c0011","sourceType":"report","company":"广汇汽车","companyRaw":"广汇汽车","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"negative","riskType":"financial_performance","riskLevel":"high","summary":"2024年经营困难并面临退市。","evidence":"2024 年，昔日汽车经销巨头广汇汽车经营困难，面临退市。","pages":[13],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:f9aecf6e5f792adca85d56c7","status":"verified","sourceId":"launch-tech-2024-10-11:c0007","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"operation_supply","sentiment":"positive","riskType":"operational","riskLevel":"low","summary":"公司将硬件产品包精简74.36%，以聚焦高盈利产品并控制研发支出及收入成本。","evidence":"截至2022 年6 月30 日，元征科技的硬件产品 包精简幅度达74.36%，有效控制了研发支出及收入成本。","pages":[8],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:f617bc8b16724bbbaa631e1a","status":"verified","sourceId":"launch-tech-2024-10-11:c0004","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司自2019年起与国内大部分主机厂展开车联网合作项目。","evidence":"在汽车前市场方面，公司为国内主机厂提供基于TBOX 的车联网解决方案，自2019 年起与国内大部分主机厂展开合作项目。","pages":[4],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:eb0f15b8529a86bb3e6939e7","status":"verified","sourceId":"launch-tech-2024-10-11:c0007","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2023年营业收入达到16亿元，同比增长36%，净利润扭亏为盈并增至1.69亿元。","evidence":"通过上述调整，公司的业绩实现高质量增长，2023 年营业收入达到16 亿元，同比大幅增 长，增速达到36%，创下历史新高;同时；2021 年后，净利润扭亏为盈，23 年增长至1.69 亿元。","pages":[8],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:cd673487fec5a993535944c7","status":"verified","sourceId":"launch-tech-2024-10-11:c0008","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技的新能源诊断设备诊断软件可覆盖市场上95%以上新能源车型品牌，并支持主流新能源车型的多系统诊断。","evidence":"覆盖品牌广，功能全面：1）诊断软件覆盖新能源车型品牌广：公司新能源诊断设备的诊断软件可覆盖市场上95%以上新能源车型品牌；2）主流新能源车型诊断功能全面支持：公司支持特斯拉、零跑、埃安等主流新能源车型的多系统诊断以及可实现读取版本信息、读故障码、清故障码、读数据流、动作测试等基本功能和众多特殊功能。","pages":[10],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:bab61decfc038631f98aeacf","status":"pending_review","sourceId":"launch-tech-2024-10-11:c0001","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2024年上半年公司毛利率提升至47%，海外业务收入同比增长90%并提升收入占比。","evidence":"24 年H1 毛利率提升7pct 至47%，受益于海外/软件收入占比提升\n利润弹性1：加大海外投入，海外业务高增\n近几年公司持续加大海外渠道开拓，23 年举办了海外经销商年会，有力促\n进了海外业务拓展。24H1 公司海外业务（含海外电商）收入6.29 亿元，\nyoy+90%，得益于渠道端大力开拓，收入占比提升至63%","pages":[],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:a887e0021a9210e1536ecea9","status":"pending_review","sourceId":"launch-tech-2024-10-11:c0001","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司推动诊断设备与诊断软件分开销售，软件及远程诊断业务快速增长。","evidence":"公司推动诊断设备和诊断软件的分开销售，客户可以在线选择购买诊断软\n件和续费升级，基于远程诊断便捷度高，且具有经济性优势，因此客户采\n购意愿持续增加。\n\n23 年软件类收入贡献收入1.27 亿元，同比+49%，付费购买软件的客户数\n量同比增长106%，付费升级软件的客户数量同比增长72%，全年付费设备\n数近4 万台；远程诊断订单快速增长，全年发单数73 万，同比增长91%。","pages":[],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:89890cfd47013724db70cb63","status":"verified","sourceId":"launch-tech-2024-10-11:c0004","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司于2018年尝试从多维度挖掘解析汽车大数据商业价值，并在警用、保险、二手车领域实现突破。","evidence":"2018 年，基于自身拥有的海量汽车维修保养及运行数据，公司尝试从多维度挖掘解析汽车大数据商业价值，在警用、保险、二手车领域已实现突破","pages":[4],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:883dcf6b9d08168be0e560f6","status":"verified","sourceId":"launch-tech-2024-10-11:c0012","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技的SmartLink远程诊断实现无线远程支援，并兼容元征、专检及第三方品牌诊断设备。","evidence":"例如元征SmartLink 远程诊断实现从有线到无线的跨越，只需采用SmartLink 远程诊断盒C 头（维修端）连接故障车辆，远端的专业服务人员即可通过SmartLink 远程诊断盒B 头（服务端）对其进行实时支援，不仅支持元征品牌的综合诊断设备，还支持专检和第三方品牌的诊断设备。","pages":[14],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:818b004cf0d1a3b1ca61cc33","status":"verified","sourceId":"launch-tech-2024-10-11:c0009","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技的X-431 PAD9乘用车及防盗一体诊断设备集成48种特殊功能。","evidence":"比如元征科技的X-431 PAD9 乘用车&防盗一体诊断设备就集成了48 种特殊功能，包括防盗、电池检测等等。","pages":[11],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:804a294e70efee9aba04d9d3","status":"verified","sourceId":"launch-tech-2024-10-11:c0001","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"operation_supply","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司削减低毛利产品线，转向聚焦高毛利的汽车诊断和诊断升级业务。","evidence":"变化：砍掉低毛利的产品线，专注于为下游提供更好诊断维修技术和服务。","pages":[1],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:72923a7dd65c39ce4934485e","status":"verified","sourceId":"launch-tech-2024-10-11:c0006","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2023年净利润恢复至1.69亿元，创十年来经营性利润新高。","evidence":"直到2021 年才恢复盈利，2023 年净利润实现1.69 亿\n             元,创下十年来经营性利润的最高水平。（2022 年是受益于卖厂房收益）","pages":[6],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:708ff304bf391d1ea22fe009","status":"verified","sourceId":"launch-tech-2024-10-11:c0006","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"自2020年起通过有效措施显著降低负债水平，改善流动性和短期偿债能力。","evidence":"但自2020 年开始,公司通过有效措施显著降低了负债\n            水平,大幅改善了流动性和短期偿债能力。","pages":[7],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:6578144e2b1a3d6259ebd4b0","status":"verified","sourceId":"launch-tech-2024-10-11:c0004","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"截至2023年末，公司累计通过诊断设备与超过3亿辆车辆建立连接，终端年活跃数逾155万，同比增长约23%。","evidence":"截至2023 年末，公司已累计通过诊断设备与超3 亿辆车辆建立了连接，终端年活跃数逾 155 万，同比增长约23%；","pages":[4],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:6010e4d21e964faf2ee3f631","status":"verified","sourceId":"launch-tech-2024-10-11:c0007","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"merger_acquisition","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"公司以3.5亿元出售上海元征机械设备有限责任公司。","evidence":"根据元征科技2022 年8 月30 日的最新公告显示，其以3.5 亿元的价格 出售了上海元征机械设备有限责任公司，其业务为汽车举升机的生产和销售。","pages":[8],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:5e2c8120077d78f0f4c42892","status":"verified","sourceId":"launch-tech-2024-10-11:c0013","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"operation_supply","sentiment":"negative","riskType":"macro_policy","riskLevel":"medium","summary":"元征科技近两年加大海外拓展力度，但海外拓展可能受到海外政策影响。","evidence":"海外拓展不及预期：公司近两年加大海外拓展力度，或受海外政策影响。","pages":[16],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:57ea4e32fdb15075e39ab3fc","status":"verified","sourceId":"launch-tech-2024-10-11:c0007","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司设立新能源车产品部门，推出X-431 EV MAX新能源汽车智能诊断设备，并在第四季度实现新能源系列诊断产品量产出货。","evidence":"2022 年5 月，公司正式设立新能源车产品部门，并于6 月推出新品X-431 EV MAX 新能源汽车智能诊断设备，实现了“整车检测+电池专检”功能；","pages":[8],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:5581e39b116b741197093a38","status":"verified","sourceId":"launch-tech-2024-10-11:c0009","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技推出的X-431 ADAS PRO支持多地区各品牌车型的ADAS及六大系统校准。","evidence":"而元征的X-431 ADAS PRO 校准操作简单方 便，有着媲美原厂校准设备精度，并支持欧洲、美洲、亚洲、中国各品牌车型ADA 系统 校准和LDW/ACC/BSD/AVM/RCW/NVS 六大系统校准。","pages":[11],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:4b49848c487abadfaa8c41df","status":"verified","sourceId":"launch-tech-2024-10-11:c0007","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司与未奥汽车签署战略合作协议，开展创新营销。","evidence":"此外，公司已与未奥汽车签署战略合作协议，依托元征科技三四五线市 场的保有车辆大数据和线上、线下销售渠道，开展创新营销。","pages":[9],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:2eceb77a81eccccf2262125c","status":"verified","sourceId":"launch-tech-2024-10-11:c0012","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技推出的X-431 PAD7新能源汽车诊断设备可覆盖95%以上新能源车型，并支持电池包动态分析等功能。","evidence":"比如元征的X-431 PAD7 新能源汽车诊断设备可覆盖95%以上新能源车型，支持电池包动态分析等几十种功能。","pages":[14],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:1f559b4f337434acf0db345a","status":"verified","sourceId":"launch-tech-2024-10-11:c0004","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司于2014年推出golo系列车联网产品，获得市场高度认可。","evidence":"元征科技于2013 年调整了发展战略，决心转型为车联网的全球核心企业，并于2014 年成功推出golo 系列车联网产品，获得了市场的高度认可。","pages":[4],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:14208676c85b98e1f8db286f","status":"verified","sourceId":"launch-tech-2024-10-11:c0008","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技通过5G技术与超级远程诊断盒结合，实现不受空间限制的远程车辆故障诊断。","evidence":"通过5G 技术与超级远程诊断盒的结合，公司的超级远程诊断实现了远程车辆故障诊断，不受空间限制，可以连接任何地方的汽车维修端和诊断设备。","pages":[10],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:05732286d6bb3c6e9a1f15f7","status":"verified","sourceId":"launch-tech-2024-10-11:c0004","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"公司于1994年研制成功第一代电眼睛LE100汽车故障检测设备。","evidence":"公司于1994 年研制成功第一代电眼睛LE100 汽车故障检测设备，1997 年国内市场占有率第一，2001 年开始走向海外市场，2010 年时在全球诊断产品市场占有率第二。","pages":[4],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:00f13e12ed22a1421223c7b6","status":"verified","sourceId":"launch-tech-2024-10-11:c0009","sourceType":"report","company":"元征科技","companyRaw":"元征科技","stockCode":"02488.HK","industry":"汽车诊断与检测","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"元征科技的CRT 501胎压监测系统激活诊断工具集成传感器激活、读取、诊断、学习和编程功能。","evidence":"例如元征的CRT 501 胎压监测系统激活诊断工具，集TPMS 传感器激活、读 取、诊断、学习、编程为一体。","pages":[11],"evidenceUrl":"","publishedAt":"2024-10-11","title":"元征科技证券研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:ef7d6603ee9632ef07b8152f","status":"verified","sourceId":"icv-application-services-2023:c0006","sourceType":"report","company":"阿里","companyRaw":"阿里","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"阿里联合上汽集团共同出资成立斑马网络。","evidence":"阿里联合上汽集团共同出资成立斑马网络","pages":[14],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:950f7fd93142f29e85375e67","status":"verified","sourceId":"icv-application-services-2023:c0014","sourceType":"report","company":"蘑菇车联","companyRaw":"蘑菇车联","stockCode":"","industry":"未标注","eventType":"operation_supply","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"蘑菇车联Robotaxi在湖南衡阳市区落地运营，具备多种复杂道路操作能力。","evidence":"典型案例：蘑菇车联Robotaxi\n\n   蘑菇车联Robotaxi 在湖南衡阳市区落地运营，车辆能够准确避\n让行人、横向来车及侵入车辆，在路权博弈中顺利完成择机变道，并\n能实现大型路口转向、模糊目标识别等更为复杂的操作。","pages":[32],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:b01910feded6906b05a94e37","status":"pending_review","sourceId":"icv-application-services-2023:c0016","sourceType":"report","company":"腾讯","companyRaw":"腾讯","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"推出TAI4.0智能座舱解决方案，支持车道级精准导航、微信原生小程序打通及车内唱听互动。","evidence":"推出TAI4.0 智能座舱解决方案，支持车道级精准导 航、微信原生小程序打通、车内唱听互动等功能。","pages":[],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:5c8d0d5e53d1eaa2870db112","status":"verified","sourceId":"icv-application-services-2023:c0006","sourceType":"report","company":"腾讯","companyRaw":"腾讯","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"腾讯与长安汽车合资成立梧桐车联。","evidence":"腾讯和长安汽车合资成立梧桐车联","pages":[14],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:79a9697e26e540706afcda69","status":"pending_review","sourceId":"icv-application-services-2023:c0016","sourceType":"report","company":"百度有驾","companyRaw":"百度有驾","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"为消费者和汽车产业链客户提供汽车生活服务及一体化商业解决方案，参与内容建设的车主用户数已超过100万。","evidence":"百度旗下汽车内容和服务平台，为消费者提供看车、 买车、用车全链条汽车生活服务，为汽车整车厂商和 汽车经销商提供一体化商业解决方案，目前参与内容 建设的车主用户数已超过100 万。","pages":[],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:8e2bf4053320fa104b24765a","status":"verified","sourceId":"icv-application-services-2023:c0018","sourceType":"report","company":"百度","companyRaw":"百度","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"百度的车路协同服务品牌“萝卜快跑”累计订单量超过140万，并计划扩大城市和车辆部署。","evidence":"截至2022 年7 月，百度车路协同服务品牌“萝卜快跑”累计订单量超过140 万，计划2023 年底将开放至30 个城市，部署至少3000 辆自动驾驶汽车，为3000 万用户提供服务。","pages":[40],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:19a42a3baf8787767f6de961","status":"verified","sourceId":"icv-application-services-2023:c0006","sourceType":"report","company":"百度","companyRaw":"百度","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"百度与吉利控股集团合作组建智能汽车公司。","evidence":"百度与吉利控股集团合作组建智能汽车公司","pages":[14],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:354a9dc307d61e2a754014b9","status":"verified","sourceId":"icv-application-services-2023:c0007","sourceType":"report","company":"特斯拉","companyRaw":"特斯拉","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2022年12月，特斯拉智能车销量为41665辆，新能源汽车总销量为41665辆，智能化渗透率达到100%。","evidence":"   特斯拉           41665            41665          100%","pages":[16],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:a66c1450748425f63fd72172","status":"verified","sourceId":"icv-application-services-2023:c0007","sourceType":"report","company":"比亚迪","companyRaw":"比亚迪","stockCode":"002594.SZ / 01211.HK","industry":"新能源汽车","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2022年12月，比亚迪智能车销量为123675辆，新能源汽车总销量为216498辆，智能化渗透率为57.1%。","evidence":"   比亚迪           123675            216498           57.1%","pages":[16],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:e2502f1b935f6c57e67bb073","status":"pending_review","sourceId":"icv-application-services-2023:c0017","sourceType":"report","company":"智网科技","companyRaw":"智网科技","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"智网科技基于多云运营管理平台向宝马、捷豹、东风等汽车整车厂商提供上云服务。","evidence":"基于多云运营管理平台向宝马、捷豹、东风等汽车整车厂商提供上云服务。","pages":[],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:454ee074ebe849de713c1b3d","status":"verified","sourceId":"icv-application-services-2023:c0017","sourceType":"report","company":"智网科技","companyRaw":"智网科技","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"智网科技为超过17家汽车整车厂商和合作伙伴提供智慧客服服务，覆盖1500万车主和1.3亿用户，并为超过55家汽车整车厂商提供服务数字运营。","evidence":"智网科技    汽车整车厂商和合作伙伴提供智慧客服服务，覆盖\n\n                      1500 万车主和1.3 亿用户，为超过55 家汽车整车厂\n             商提供服务数字运营，覆盖2400 万用户。","pages":[37],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:1830cf5313dd31e3a97ea4c0","status":"pending_review","sourceId":"icv-application-services-2023:c0016","sourceType":"report","company":"智网科技","companyRaw":"智网科技","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"研发推出“智UI”HMI交互产品，融合多项智能能力并已在四款车型上量产落地。","evidence":"研发推出“智UI”HMI 交互产品，融合AI 智能、数 据分析、车身控制等能力，实现智能语音、虚拟形象、 场景推送、情感化识别、车身控制、IOT 及互联网生 态应用等功能，已在四款车型上量产落地。","pages":[],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:f23d2b71dcb191b3604c2365","status":"pending_review","sourceId":"icv-application-services-2023:c0018","sourceType":"report","company":"德赛西威","companyRaw":"德赛西威","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"德赛西威2022年智能座舱和智能驾驶业务营收分别同比增长47.97%和83.07%。","evidence":"2022 年智能座舱营收117.55 亿元，同比增长47.97%；智能驾驶营收25.71 亿元，同比增长83.07%。","pages":[],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:2648a54aebc56aaa5a3cd528","status":"verified","sourceId":"icv-application-services-2023:c0019","sourceType":"report","company":"德赛西威","companyRaw":"德赛西威","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"德赛西威2022年智能座舱营收117.55亿元，同比增长47.97%，智能驾驶营收25.71亿元，同比增长83.07%。","evidence":"据德赛西威年报数据，2022 年智能座舱营收117.55 亿元，同比增长47.97%；智能驾驶营收25.71 亿元，同比增长83.07%。","pages":[41],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:1e5acb1f94daaa0047a675c7","status":"pending_review","sourceId":"icv-application-services-2023:c0016","sourceType":"report","company":"德赛西威","companyRaw":"德赛西威","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"重点布局车载娱乐和车载信息系统业务，与60余家汽车整车厂商合作并铺设400余家售后网点。","evidence":"重点布局车载娱乐系统、车载信息系统等业务，与60 余家汽车整车厂商合作，国内铺设400 余家售后网点。","pages":[],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:15c60c69eb96319953d63745","status":"verified","sourceId":"icv-application-services-2023:c0010","sourceType":"report","company":"宝马","companyRaw":"宝马","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"neutral","riskType":"none","riskLevel":"none","summary":"宝马在小程序、官网和APP等平台为用户提供1V1视频客服服务，并通过后台记录跟踪客户问题反馈。","evidence":"宝马在小程序、官网、APP 等平台为用户提供1V1 视频接线服务，通过视频实时解答客户咨询的问题，并在展厅现场展示品牌车辆，通过后台服务记录收集客户信息，引导线索下发，对客户问题进行及时跟踪反馈。","pages":[22],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9c383dad43fe0b0df92e9289","status":"verified","sourceId":"icv-application-services-2023:c0006","sourceType":"report","company":"华为","companyRaw":"华为","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"华为与长安汽车、北京汽车达成战略合作，并联合汽车整车厂商成立“5G 汽车生态圈”。","evidence":"华为与长安汽车、北京汽车达成战略合作，推动智能座舱、自动驾驶等落地，并联合18 家汽车整车厂商成立“5G 汽车生态圈”。","pages":[14],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:8fa4ff2ce5d86091d878cacb","status":"verified","sourceId":"icv-application-services-2023:c0018","sourceType":"report","company":"华为","companyRaw":"华为","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"华为发布高阶智驾系统 ADS 2.0，并计划年底前实现45个无图城市落地。","evidence":"2023 年4 月发布高阶智驾系统 ADS 2.0，计划年底前实现45 个无图城市的落地。","pages":[39],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:0e520b3cc92ba979d90b695a","status":"verified","sourceId":"icv-application-services-2023:c0014","sourceType":"report","company":"冀东水泥","companyRaw":"冀东水泥","stockCode":"","industry":"未标注","eventType":"product_technology","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"冀东水泥在阳泉智慧矿山对矿车和挖机进行线控改造并安装自动驾驶、远程驾驶系统，实现矿车无人化运输等功能。","evidence":"典型案例：阳泉冀东水泥智慧矿山云控无人矿卡\n\n  阳泉冀东水泥智慧矿山对矿车和挖机进行线控改造，安装自动驾\n驶系统、远程驾驶系统，实现矿车无人化自动驾驶运输，挖机调度协\n同以及无人卸料等功能。","pages":[32],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:729eca015e84d82ba9fb1704","status":"verified","sourceId":"icv-application-services-2023:c0019","sourceType":"report","company":"亿咖通科技","companyRaw":"亿咖通科技","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"亿咖通科技自2021年起联合伟世通、高通等企业面向全球市场提供智能座舱解决方案。","evidence":"2021 年起联合伟世通、高通等企业，面向全球市场提供智能座舱解决方案，探索构建国际化研发体系。","pages":[41],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:413bbf11e9dbd9c6a3dee90c","status":"verified","sourceId":"icv-application-services-2023:c0019","sourceType":"report","company":"亿咖通科技","companyRaw":"亿咖通科技","stockCode":"","industry":"未标注","eventType":"performance","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"亿咖通科技的产品及服务已覆盖超过320万辆汽车，并为12个汽车品牌超过40款车型提供定制服务与产品。","evidence":"目前，亿咖通科技产品及服务已覆盖超过320 万辆汽车，为吉利、领克、宝腾等12 个汽车品牌超过40 款车型提供智能交互系统、车载地图等定制服务与产品","pages":[41],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:cd7d9eac3931cf471ff81a55","status":"pending_review","sourceId":"icv-application-services-2023:c0016","sourceType":"report","company":"京东汽车","companyRaw":"京东汽车","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"依托汽车用户、线下门店和媒体资源，为整车厂商提供数字化营销等服务，并为消费者提供汽车相关产品与服务。","evidence":"依托其8000 万汽车相关用户、2 万家线下门店及自有 媒体资源，为汽车整车厂商提供数字化营销、销售线 索、用户需求挖掘等服务，为汽车消费者提供汽车相 关的产品与服务。","pages":[],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":["evidence_not_in_current_text"],"validationStatus":"pending_review"},{"id":"event:550b461d9016cebdfcc6ff1e","status":"verified","sourceId":"icv-application-services-2023:c0015","sourceType":"report","company":"中国联通","companyRaw":"中国联通","stockCode":"600050.SH","industry":"通信运营","eventType":"other","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"2015年成立专注于智能网联汽车的专业子公司联通智网科技股份有限公司，提供全生命周期应用服务。","evidence":"2015 年，中国联通成立专注于智能网联汽车的专业子公司联通智网科技股份有限公司，提供面向智能网联汽车全生命周期场景的应用服务，包括车路协同、车队管理、智能座舱等创新应用。","pages":[34],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:9f38719986aae90bd587f9e0","status":"verified","sourceId":"icv-application-services-2023:c0015","sourceType":"report","company":"中国移动","companyRaw":"中国移动","stockCode":"","industry":"未标注","eventType":"partnership_order","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国移动联合德国电信成立合资公司中移德电，并于2018年成立中移智行网络科技有限公司，拓展相关应用服务。","evidence":"同年，中国移动联合德国电信成立合资公司中移德电，并在2018 年成立中移智行网络科技有限公司，重点拓展自动驾驶、智慧公路、飞联网等应用服务。","pages":[34],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"},{"id":"event:83cd7d481d6b0b822f2cd557","status":"verified","sourceId":"icv-application-services-2023:c0015","sourceType":"report","company":"中国电信","companyRaw":"中国电信","stockCode":"","industry":"未标注","eventType":"operation_supply","sentiment":"positive","riskType":"none","riskLevel":"none","summary":"中国电信于2012年建立上海智能网联汽车基地，并于2021年组建天翼交通科技有限公司。","evidence":"中国电信最早于2012 年建立上海智能网联汽车基地，2021 年依托天翼物联，联合苏州市有关国资平台及中智行公司组建专业子公司天翼交通科技有限公司，致力于打造国家级智能网联汽车先导区，","pages":[34],"evidenceUrl":"","publishedAt":"2023-04","title":"智能网联汽车应用服务市场研究报告","reviewReasons":[],"validationStatus":"verified"}]};
+</script>
+  <script>
+(() => {
+  "use strict";
+
+  const data = window.FINANCE_DEMO_DATA;
+  if (!data || !Array.isArray(data.events)) {
+    document.body.innerHTML = '<main class="fatal-error"><h1>Demo 数据未载入</h1><p>请重新运行 build-demo 命令生成离线入口。</p></main>';
+    return;
+  }
+
+  const LABELS = {
+    eventType: {
+      performance: "业绩",
+      financing: "融资",
+      merger_acquisition: "并购重组",
+      product_technology: "产品与技术",
+      partnership_order: "合作与订单",
+      policy_regulation: "政策与监管",
+      litigation_penalty: "诉讼与处罚",
+      market_price: "市场与价格",
+      operation_supply: "经营与供应链",
+      other: "其他"
+    },
+    sentiment: { positive: "正面", neutral: "中性", negative: "负面" },
+    riskType: {
+      financial_performance: "财务与业绩",
+      market_competition: "市场竞争",
+      operational: "经营",
+      regulatory_legal: "监管与法律",
+      technology_data_security: "技术与数据安全",
+      governance: "治理",
+      supply_chain: "供应链",
+      macro_policy: "宏观与政策",
+      none: "无明确风险"
+    },
+    riskLevel: { none: "无", low: "低", medium: "中", high: "高" },
+    sourceType: { report: "报告", news: "新闻" },
+    reviewReason: { evidence_not_in_current_text: "证据未在当前文本块逐字命中" }
+  };
+
+  const verifiedEvents = data.events.filter((event) => event.status === "verified");
+  const reviewEvents = data.events.filter((event) => event.status === "pending_review");
+  const state = {
+    view: "overview",
+    page: 1,
+    pageSize: 15,
+    filters: { query: "", source: "", company: "", eventType: "", sentiment: "", risk: "", year: "" },
+    lastFocus: null
+  };
+
+  const qs = (selector, root = document) => root.querySelector(selector);
+  const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+  const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+  const label = (group, value) => LABELS[group]?.[value] || value || "未标注";
+  const percent = (value) => `${(Number(value) * 100).toFixed(2)}%`;
+  const byLocale = (left, right) => left.localeCompare(right, "zh-CN");
+  const normalize = (value) => String(value || "").trim().toLocaleLowerCase("zh-CN");
+
+  function formatDate(value) {
+    if (!value) return "日期未标注";
+    return value.length >= 10 ? value.slice(0, 10) : value;
+  }
+
+  function setText(selector, value) {
+    const node = qs(selector);
+    if (node) node.textContent = String(value);
+  }
+
+  function initOverview() {
+    const scope = data.scope;
+    setText("#metricVerified", scope.verified_event_count);
+    setText("#metricAcceptance", `${scope.candidate_event_count} 条候选中的 ${percent(scope.event_acceptance_rate)}`);
+    setText("#metricSources", scope.input_source_count);
+    setText("#metricEvidence", percent(data.evidence.verified_event_evidence_match_rate));
+    setText("#metricFailed", `${scope.source_result_statuses.failed || 0} 个失败来源`);
+    setText("#reviewNavCount", scope.review_event_count);
+    setText("#reviewCount", scope.review_event_count);
+    setText("#sidebarRunId", data.runId);
+    renderBarChart();
+    renderSentiment();
+    renderRisk();
+    renderYears();
+    renderSparkline();
+    renderRuntime();
+  }
+
+  function renderBarChart() {
+    const rows = data.distributions.event_types;
+    const max = Math.max(...rows.map((row) => row.count), 1);
+    qs("#eventTypeChart").innerHTML = rows.map((row) => `
+      <div class="bar-row" title="${escapeHtml(label("eventType", row.value))}：${row.count} 条，占 ${percent(row.share)}">
+        <span class="bar-label">${escapeHtml(label("eventType", row.value))}</span>
+        <span class="bar-track" aria-hidden="true"><i class="bar-fill" style="width:${(row.count / max) * 100}%"></i></span>
+        <strong class="bar-value">${row.count}</strong>
+      </div>`).join("");
+  }
+
+  function renderSentiment() {
+    const rows = data.distributions.sentiments;
+    qs("#sentimentMeter").innerHTML = rows.map((row) => `<span class="meter-segment meter-${escapeHtml(row.value)}" style="width:${row.share * 100}%" title="${escapeHtml(label("sentiment", row.value))} ${percent(row.share)}"></span>`).join("");
+    qs("#sentimentList").innerHTML = rows.map((row) => `
+      <div class="compact-row"><i class="meter-${escapeHtml(row.value)}" aria-hidden="true"></i><span>${escapeHtml(label("sentiment", row.value))}</span><strong>${row.count}</strong><small>${percent(row.share)}</small></div>`).join("");
+  }
+
+  function renderRisk() {
+    const rows = data.distributions.risk_levels;
+    qs("#riskList").innerHTML = rows.map((row) => `
+      <div class="compact-row"><span>${escapeHtml(label("riskLevel", row.value))}风险</span><strong>${row.count} · ${percent(row.share)}</strong><span class="risk-track" aria-hidden="true"><b style="width:${row.share * 100}%"></b></span></div>`).join("");
+  }
+
+  function renderYears() {
+    const rows = [...data.distributions.years].sort((a, b) => String(a.value).localeCompare(String(b.value)));
+    const max = Math.max(...rows.map((row) => row.count), 1);
+    qs("#yearChart").innerHTML = rows.map((row) => `
+      <div class="year-column" title="${row.value} 年：${row.count} 条"><strong>${row.count}</strong><i style="height:${Math.max(4, (row.count / max) * 94)}px" aria-hidden="true"></i><span>${escapeHtml(row.value)}</span></div>`).join("");
+  }
+
+  function renderSparkline() {
+    const rows = [...data.distributions.years].sort((a, b) => String(a.value).localeCompare(String(b.value)));
+    const width = 180;
+    const height = 54;
+    const max = Math.max(...rows.map((row) => row.count), 1);
+    const step = rows.length > 1 ? width / (rows.length - 1) : width;
+    const points = rows.map((row, index) => `${index * step},${height - (row.count / max) * 44 - 4}`);
+    qs("#sparkLine").setAttribute("d", `M${points.join(" L")}`);
+    qs("#sparkFill").setAttribute("d", `M0,${height} L${points.join(" L")} L${width},${height} Z`);
+  }
+
+  function renderRuntime() {
+    const runtime = data.runtime;
+    const token = Object.values(runtime.token_usage || {})[0] || {};
+    qs("#runtimeDetails").innerHTML = [
+      ["模型", runtime.model],
+      ["提示词版本", runtime.prompt_version],
+      ["输入 token", Number(token.prompt_tokens || 0).toLocaleString("zh-CN")],
+      ["输出 token", Number(token.completion_tokens || 0).toLocaleString("zh-CN")],
+      ["估算费用", `$${Number(runtime.estimated_cost_usd).toFixed(6)}`]
+    ].map(([term, value]) => `<div><dt>${escapeHtml(term)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
+  }
+
+  function fillSelect(id, values, group = null) {
+    const select = qs(id);
+    const current = select.value;
+    const first = select.options[0].outerHTML;
+    select.innerHTML = first + values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(group ? label(group, value) : value)}</option>`).join("");
+    select.value = current;
+  }
+
+  function initFilters() {
+    fillSelect("#companyFilter", [...new Set(verifiedEvents.map((event) => event.company))].sort(byLocale));
+    fillSelect("#typeFilter", [...new Set(verifiedEvents.map((event) => event.eventType))].sort((a, b) => byLocale(label("eventType", a), label("eventType", b))), "eventType");
+    fillSelect("#sentimentFilter", ["positive", "neutral", "negative"], "sentiment");
+    fillSelect("#riskFilter", [...new Set(verifiedEvents.map((event) => event.riskLevel))].sort(), "riskLevel");
+    fillSelect("#yearFilter", [...new Set(verifiedEvents.map((event) => String(event.publishedAt).slice(0, 4)))].filter(Boolean).sort().reverse());
+    const form = qs("#filterForm");
+    form.addEventListener("input", updateFilters);
+    form.addEventListener("change", updateFilters);
+    form.addEventListener("reset", () => requestAnimationFrame(() => {
+      state.filters = { query: "", source: "", company: "", eventType: "", sentiment: "", risk: "", year: "" };
+      state.page = 1;
+      renderEventTable();
+    }));
+    qsa("[data-reset-filters]").forEach((button) => button.addEventListener("click", () => {
+      form.reset();
+      form.dispatchEvent(new Event("reset"));
+    }));
+  }
+
+  function updateFilters() {
+    state.filters = {
+      query: qs("#searchInput").value,
+      source: qs("#sourceFilter").value,
+      company: qs("#companyFilter").value,
+      eventType: qs("#typeFilter").value,
+      sentiment: qs("#sentimentFilter").value,
+      risk: qs("#riskFilter").value,
+      year: qs("#yearFilter").value
+    };
+    state.page = 1;
+    renderEventTable();
+  }
+
+  function filteredEvents() {
+    const filter = state.filters;
+    const query = normalize(filter.query);
+    return verifiedEvents.filter((event) => {
+      const haystack = normalize([event.company, event.companyRaw, event.title, event.summary, event.evidence, event.stockCode].join(" "));
+      return (!query || haystack.includes(query)) &&
+        (!filter.source || event.sourceType === filter.source) &&
+        (!filter.company || event.company === filter.company) &&
+        (!filter.eventType || event.eventType === filter.eventType) &&
+        (!filter.sentiment || event.sentiment === filter.sentiment) &&
+        (!filter.risk || event.riskLevel === filter.risk) &&
+        (!filter.year || String(event.publishedAt).startsWith(filter.year));
+    });
+  }
+
+  function renderEventTable() {
+    const rows = filteredEvents();
+    const pages = Math.max(1, Math.ceil(rows.length / state.pageSize));
+    state.page = Math.min(state.page, pages);
+    const start = (state.page - 1) * state.pageSize;
+    const pageRows = rows.slice(start, start + state.pageSize);
+    setText("#resultCount", rows.length);
+    qs("#resetFilters").hidden = !Object.values(state.filters).some(Boolean);
+    qs("#eventEmpty").hidden = pageRows.length > 0;
+    qs("#pagination").hidden = rows.length === 0;
+    qs("#eventTableBody").innerHTML = pageRows.map((event) => `
+      <tr tabindex="0" data-event-id="${escapeHtml(event.id)}" aria-label="查看 ${escapeHtml(event.company)} 的事件证据">
+        <td class="company-cell"><strong>${escapeHtml(event.company)}</strong><span>${escapeHtml(label("sourceType", event.sourceType))}${event.stockCode ? ` · ${escapeHtml(event.stockCode)}` : ""}</span></td>
+        <td class="summary-cell">${escapeHtml(event.summary)}</td>
+        <td><span class="category-label">${escapeHtml(label("eventType", event.eventType))}</span></td>
+        <td><span class="sentiment-text sentiment-${escapeHtml(event.sentiment)}">${escapeHtml(label("sentiment", event.sentiment))}</span></td>
+        <td><span class="risk-text risk-${escapeHtml(event.riskLevel)}">${escapeHtml(label("riskLevel", event.riskLevel))}</span></td>
+        <td class="date-cell">${escapeHtml(formatDate(event.publishedAt))}</td>
+        <td class="row-action"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></td>
+      </tr>`).join("");
+    setText("#pageSummary", rows.length ? `第 ${start + 1}–${Math.min(start + state.pageSize, rows.length)} 条，共 ${rows.length} 条` : "无匹配结果");
+    qs("#prevPage").disabled = state.page <= 1;
+    qs("#nextPage").disabled = state.page >= pages;
+    bindEventOpeners(qsa("#eventTableBody tr"));
+  }
+
+  function renderReviews() {
+    qs("#reviewList").innerHTML = reviewEvents.map((event) => `
+      <article class="review-card">
+        <header><strong>${escapeHtml(event.company)}</strong><span>待复核</span></header>
+        <p>${escapeHtml(event.summary)}</p>
+        <footer><span>${escapeHtml(label("eventType", event.eventType))} · ${escapeHtml(formatDate(event.publishedAt))}</span><button class="text-button" type="button" data-event-id="${escapeHtml(event.id)}">查看证据问题</button></footer>
+      </article>`).join("");
+    bindEventOpeners(qsa("#reviewList [data-event-id]"));
+  }
+
+  function bindEventOpeners(nodes) {
+    nodes.forEach((node) => {
+      node.addEventListener("click", () => openEvent(node.dataset.eventId, node));
+      if (node.tagName === "TR") {
+        node.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openEvent(node.dataset.eventId, node);
+          }
+        });
+      }
+    });
+  }
+
+  function sourceHtml(event) {
+    const pageText = event.pages.length ? `PDF 第 ${event.pages.join("、")} 页` : "PDF 页码待复核";
+    const safeUrl = /^https?:\/\//i.test(event.evidenceUrl || "") ? event.evidenceUrl : "";
+    return `<div class="source-card"><strong>${escapeHtml(event.title || "来源标题未标注")}</strong><span>${escapeHtml(event.sourceType === "report" ? pageText : formatDate(event.publishedAt))}</span>${safeUrl ? `<a class="source-link" href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">打开新闻原文<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M17 13v6H5V7h6"/></svg></a>` : ""}</div>`;
+  }
+
+  function openEvent(id, trigger) {
+    const event = data.events.find((item) => item.id === id);
+    if (!event) return;
+    state.lastFocus = trigger || document.activeElement;
+    const isReview = event.status === "pending_review";
+    setText("#drawerStatus", isReview ? "待复核事件 · 未进入正式统计" : "证据验证通过");
+    setText("#drawerTitle", event.company);
+    qs("#drawerBody").innerHTML = `
+      <p class="detail-summary">${escapeHtml(event.summary)}</p>
+      <dl class="detail-grid">
+        <div><dt>事件类型</dt><dd>${escapeHtml(label("eventType", event.eventType))}</dd></div>
+        <div><dt>发布日期</dt><dd>${escapeHtml(formatDate(event.publishedAt))}</dd></div>
+        <div><dt>情绪标签</dt><dd>${escapeHtml(label("sentiment", event.sentiment))}</dd></div>
+        <div><dt>风险标签</dt><dd>${escapeHtml(label("riskType", event.riskType))} · ${escapeHtml(label("riskLevel", event.riskLevel))}</dd></div>
+        <div><dt>来源类型</dt><dd>${escapeHtml(label("sourceType", event.sourceType))}</dd></div>
+        <div><dt>股票代码</dt><dd>${escapeHtml(event.stockCode || "未标注")}</dd></div>
+      </dl>
+      ${isReview ? `<div class="review-reason"><strong>待复核原因</strong>${event.reviewReasons.map((reason) => escapeHtml(label("reviewReason", reason))).join("；")}</div>` : ""}
+      <section class="evidence-block"><header><h3>原文证据</h3><button class="copy-button" id="copyEvidence" type="button">复制证据</button></header><blockquote>${escapeHtml(event.evidence)}</blockquote></section>
+      ${sourceHtml(event)}
+      <div class="source-card"><strong>记录标识</strong><span><code>${escapeHtml(event.id)}</code></span><span><code>${escapeHtml(event.sourceId)}</code></span></div>`;
+    qs("#copyEvidence").addEventListener("click", () => copyText(event.evidence));
+    const drawer = qs("#eventDrawer");
+    drawer.showModal();
+    qs("#closeDrawer").focus();
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (_) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+    }
+    showToast("原文证据已复制");
+  }
+
+  function showToast(message) {
+    const toast = qs("#toast");
+    toast.textContent = message;
+    toast.hidden = false;
+    window.clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => { toast.hidden = true; }, 2200);
+  }
+
+  const LOCAL_SAMPLE = `中国联通发布智算云平台升级方案，并与多家产业伙伴签署合作协议。公司上半年营业收入增长，算力业务订单继续增加。\n\n受客户集中度、原材料价格波动和回款周期影响，相关项目仍存在经营风险，需要继续核验合同和财务数据。`;
+  const LOCAL_KEYWORDS = [
+    "营业收入", "净利润", "营收", "利润", "投资", "融资", "并购", "合作", "订单", "签约", "回购", "减持", "股价", "价格", "市场", "产品", "技术", "平台", "算力", "数据", "云", "AI", "供应链", "原材料", "客户", "风险", "承压", "波动", "召回", "安全隐患", "增长", "下滑", "回款"
+  ];
+  const LOCAL_ENTITIES = ["中国联通", "中国移动", "中国电信", "比亚迪", "宁德时代", "元征科技", "上汽集团", "华为", "腾讯", "阿里", "百度", "特斯拉", "福田", "联通智网科技"];
+  const POSITIVE_TERMS = ["增长", "增加", "提升", "盈利", "净利润", "合作", "订单", "签署", "回购", "上市", "突破", "改善", "领先"];
+  const NEGATIVE_TERMS = ["风险", "承压", "波动", "下滑", "下降", "减持", "召回", "安全隐患", "亏损", "依赖", "处罚", "诉讼", "回款"];
+  let localAnalysis = { paragraphs: [], sourceText: "" };
+
+  function parseLocalText(raw, fileName = "") {
+    let text = String(raw || "").replace(/\r\n?/g, "\n").trim();
+    if (!text) return "";
+    if (/\.json$/i.test(fileName) || /^[\[{]/.test(text)) {
+      try { text = JSON.stringify(JSON.parse(text), null, 2); } catch (_) { /* keep original text */ }
+    }
+    return text;
+  }
+
+  function splitLocalParagraphs(text) {
+    const chunks = text.split(/\n\s*\n|(?<=。|！|？|；)\s*(?=[A-Z\u4e00-\u9fff])/).map((part) => part.trim()).filter(Boolean);
+    return (chunks.length ? chunks : [text]).slice(0, 120).map((text, index) => ({ index: index + 1, text }));
+  }
+
+  function countTerm(text, term) {
+    return (text.match(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")) || []).length;
+  }
+
+  function localFindings(paragraphs) {
+    const rules = [
+      { type: "合作/订单", terms: ["合作", "订单", "签约", "协议"], tag: "事件线索" },
+      { type: "投资/经营", terms: ["投资", "建设", "扩产", "营收", "净利润"], tag: "事件线索" },
+      { type: "市场/价格", terms: ["股价", "价格", "市场", "回购", "减持"], tag: "事件线索" },
+      { type: "风险提示", terms: ["风险", "承压", "波动", "召回", "安全隐患", "依赖", "回款"], tag: "待核验" }
+    ];
+    return rules.map((rule) => {
+      const hit = paragraphs.find((paragraph) => rule.terms.some((term) => paragraph.text.includes(term)));
+      if (!hit) return null;
+      const matched = rule.terms.filter((term) => hit.text.includes(term)).slice(0, 3).join("、");
+      return { type: rule.type, tag: rule.tag, evidence: hit.text.slice(0, 130), matched, paragraph: hit.index };
+    }).filter(Boolean);
+  }
+
+  function renderLocalParagraphs(query = "") {
+    const normalized = normalize(query);
+    const rows = localAnalysis.paragraphs.filter((paragraph) => !normalized || normalize(paragraph.text).includes(normalized));
+    setText("#analysisParagraphCount", `${rows.length} / ${localAnalysis.paragraphs.length} 段`);
+    qs("#analysisParagraphs").innerHTML = rows.slice(0, 40).map((paragraph) => `<article class="paragraph-row${normalized ? " is-hit" : ""}"><span>P${paragraph.index}</span><p>${escapeHtml(paragraph.text)}</p></article>`).join("") || '<div class="empty-state"><strong>没有匹配段落</strong><span>换一个关键词试试。</span></div>';
+  }
+
+  function runLocalAnalysis(raw, fileName = "粘贴文本") {
+    const text = parseLocalText(raw, fileName);
+    if (!text) { showToast("请先上传或粘贴文本"); return; }
+    const paragraphs = splitLocalParagraphs(text);
+    const keywordRows = LOCAL_KEYWORDS.map((term) => ({ term, count: countTerm(text, term) })).filter((row) => row.count).sort((a, b) => b.count - a.count || b.term.length - a.term.length).slice(0, 14);
+    const entities = LOCAL_ENTITIES.filter((entity) => text.includes(entity));
+    const positive = POSITIVE_TERMS.reduce((sum, term) => sum + countTerm(text, term), 0);
+    const negative = NEGATIVE_TERMS.reduce((sum, term) => sum + countTerm(text, term), 0);
+    const highRisk = ["召回", "安全隐患", "处罚", "诉讼", "大幅下跌"].some((term) => text.includes(term));
+    const mediumRisk = ["风险", "承压", "波动", "依赖", "回款"].some((term) => text.includes(term));
+    const findings = localFindings(paragraphs);
+    localAnalysis = { paragraphs, sourceText: text, findings };
+    setText("#analysisTitle", fileName || "本地文本");
+    setText("#analysisStatus", "已完成 · 本地规则");
+    qs("#analysisStatus").classList.add("is-ready");
+    qs("#analysisEmpty").hidden = true;
+    qs("#analysisResults").hidden = false;
+    qs("#analysisMetrics").innerHTML = [
+      [text.length.toLocaleString("zh-CN"), "字符"],
+      [paragraphs.length, "段落"],
+      [entities.length, "已识别主体"],
+      [highRisk ? "高" : mediumRisk ? "中" : "低", "风险提示"]
+    ].map(([value, labelText]) => `<div class="analysis-metric"><strong>${escapeHtml(value)}</strong><span>${escapeHtml(labelText)}</span></div>`).join("");
+    qs("#analysisKeywords").innerHTML = keywordRows.length ? keywordRows.map((row) => `<span class="analysis-chip">${escapeHtml(row.term)} <b>×${row.count}</b></span>`).join("") : '<span class="analysis-chip">未命中内置财经词典</span>';
+    qs("#analysisFindings").innerHTML = [
+      entities.length ? `<div class="finding-row"><strong>主体</strong><p>${escapeHtml(entities.join("、"))}</p><span class="finding-tag">词典</span></div>` : "",
+      findings.map((finding) => `<div class="finding-row"><strong>${escapeHtml(finding.type)}</strong><p>${escapeHtml(finding.evidence)}<br><small>命中：${escapeHtml(finding.matched)} · 原文段落 P${finding.paragraph}</small></p><span class="finding-tag">${escapeHtml(finding.tag)}</span></div>`).join(""),
+      `<div class="finding-row"><strong>情绪倾向</strong><p>${positive > negative ? "正面词较多" : negative > positive ? "负面词较多" : "正负面词数量接近"}（正面 ${positive} · 负面 ${negative}）</p><span class="finding-tag">启发式</span></div>`
+    ].join("") || '<div class="empty-state"><strong>暂未识别线索</strong><span>可以补充更完整的财经文本后重试。</span></div>';
+    renderLocalParagraphs();
+    showToast("本地分析完成，可继续检索段落");
+  }
+
+  function initLocalWorkspace() {
+    const input = qs("#workspaceInput");
+    const fileInput = qs("#textFile");
+    const dropzone = qs("#dropzone");
+    const fileName = qs("#fileName");
+    const loadFile = (file) => {
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { showToast("单个文本文件请控制在 2 MB 以内"); return; }
+      const reader = new FileReader();
+      reader.onload = () => { input.value = String(reader.result || ""); fileName.textContent = `${file.name} · ${(file.size / 1024).toFixed(1)} KB`; };
+      reader.onerror = () => showToast("文件读取失败，请改用粘贴文本");
+      reader.readAsText(file, "UTF-8");
+    };
+    fileInput.addEventListener("change", () => loadFile(fileInput.files[0]));
+    ["dragenter", "dragover"].forEach((eventName) => dropzone.addEventListener(eventName, (event) => { event.preventDefault(); dropzone.classList.add("is-dragging"); }));
+    ["dragleave", "drop"].forEach((eventName) => dropzone.addEventListener(eventName, (event) => { event.preventDefault(); dropzone.classList.remove("is-dragging"); }));
+    dropzone.addEventListener("drop", (event) => loadFile(event.dataTransfer.files[0]));
+    qs("#analyzeText").addEventListener("click", () => runLocalAnalysis(input.value));
+    qs("#loadSampleText").addEventListener("click", () => { input.value = LOCAL_SAMPLE; fileName.textContent = "内置示例文本"; runLocalAnalysis(input.value, "内置示例文本"); });
+    qs("#clearWorkspace").addEventListener("click", () => { input.value = ""; fileInput.value = ""; fileName.textContent = "也可以直接在下方粘贴文本"; localAnalysis = { paragraphs: [], sourceText: "" }; qs("#analysisResults").hidden = true; qs("#analysisEmpty").hidden = false; setText("#analysisTitle", "等待输入材料"); setText("#analysisStatus", "未运行"); qs("#analysisStatus").classList.remove("is-ready"); });
+    qs("#localSearchInput").addEventListener("input", (event) => renderLocalParagraphs(event.target.value));
+    qs("#verifyText").addEventListener("click", () => { const excerpt = qs("#localSearchInput").value.trim(); if (!excerpt) { showToast("先在段落检索框输入要核验的摘录"); return; } const found = normalize(localAnalysis.sourceText).includes(normalize(excerpt)); showToast(found ? "摘录已在当前文本中命中" : "未在当前文本中找到逐字匹配"); });
+  }
+
+  const viewMeta = {
+    overview: ["冻结运行", "完整语料概览"],
+    events: ["证据检索", "验证事件工作台"],
+    workspace: ["本地文本工作台", "放入文本，即时分析"],
+    review: ["质量控制", "待复核队列"],
+    method: ["项目说明", "方法与评测边界"]
+  };
+
+  function switchView(view) {
+    if (!viewMeta[view]) return;
+    state.view = view;
+    qsa("[data-view-panel]").forEach((panel) => {
+      const active = panel.dataset.viewPanel === view;
+      panel.hidden = !active;
+      panel.classList.toggle("is-active", active);
+    });
+    qsa("[data-view]").forEach((button) => {
+      const active = button.dataset.view === view;
+      button.classList.toggle("is-active", active);
+      if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+    });
+    setText("#viewKicker", viewMeta[view][0]);
+    setText("#viewTitle", viewMeta[view][1]);
+    document.title = `${viewMeta[view][1]}｜财经证据台`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    closeMobileMenu();
+  }
+
+  function closeMobileMenu() {
+    qs("#sidebar").classList.remove("is-open");
+    qs("#menuButton").setAttribute("aria-expanded", "false");
+  }
+
+  function initNavigation() {
+    qsa("[data-view]").forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
+    qsa("[data-jump-view]").forEach((button) => button.addEventListener("click", () => switchView(button.dataset.jumpView)));
+    qs("#menuButton").addEventListener("click", () => {
+      const open = qs("#sidebar").classList.toggle("is-open");
+      qs("#menuButton").setAttribute("aria-expanded", String(open));
+    });
+    qs("#prevPage").addEventListener("click", () => { state.page = Math.max(1, state.page - 1); renderEventTable(); qs("#eventTableRegion").scrollIntoView({ behavior: "smooth", block: "start" }); });
+    qs("#nextPage").addEventListener("click", () => { state.page += 1; renderEventTable(); qs("#eventTableRegion").scrollIntoView({ behavior: "smooth", block: "start" }); });
+  }
+
+  function initDialogs() {
+    const drawer = qs("#eventDrawer");
+    const help = qs("#helpDialog");
+    qs("#closeDrawer").addEventListener("click", () => drawer.close());
+    qs("#helpButton").addEventListener("click", (event) => { state.lastFocus = event.currentTarget; help.showModal(); qs("#closeHelp").focus(); });
+    qs("#closeHelp").addEventListener("click", () => help.close());
+    [drawer, help].forEach((dialog) => {
+      dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+      dialog.addEventListener("close", () => { if (state.lastFocus?.focus) state.lastFocus.focus(); });
+    });
+  }
+
+  function initTheme() {
+    let stored = "";
+    try { stored = localStorage.getItem("finance-demo-theme") || ""; } catch (_) { stored = ""; }
+    if (stored) document.documentElement.dataset.theme = stored;
+    qs("#themeButton").addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem("finance-demo-theme", next); } catch (_) { /* file privacy mode */ }
+      showToast(next === "dark" ? "已切换为深色主题" : "已切换为浅色主题");
+    });
+  }
+
+  initOverview();
+  initFilters();
+  renderEventTable();
+  renderReviews();
+  initNavigation();
+  initDialogs();
+  initTheme();
+  initLocalWorkspace();
+})();
+
+</script>
+</body>
+</html>

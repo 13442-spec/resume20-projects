@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>汽车后市场可信数据空间产品化 Demo｜单文件入口</title>
+  <style>
+:root {
+  --bg: #07111f;
+  --panel: rgba(14, 28, 48, 0.82);
+  --line: rgba(142, 178, 220, 0.22);
+  --text: #eef6ff;
+  --muted: #91a8c0;
+  --blue: #58a6ff;
+  --cyan: #5eead4;
+  --green: #51d88a;
+  --yellow: #f7c948;
+  --red: #ff6b6b;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(51, 132, 255, 0.26), transparent 32%),
+    radial-gradient(circle at 78% 6%, rgba(94, 234, 212, 0.17), transparent 28%),
+    linear-gradient(135deg, #050910 0%, #0a1728 56%, #08111f 100%);
+}
+
+.app-shell {
+  width: min(1440px, calc(100vw - 40px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 22px;
+  align-items: stretch;
+  margin-bottom: 22px;
+}
+
+.hero-copy, .hero-card, .panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  border-radius: 24px;
+}
+
+.hero-copy { padding: 30px; }
+
+.eyebrow {
+  color: var(--cyan);
+  letter-spacing: 0.2em;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+h1 {
+  margin: 12px 0;
+  font-size: clamp(34px, 5vw, 64px);
+  line-height: 1.04;
+}
+
+h2 { margin: 0 0 16px; font-size: 22px; }
+h3 { margin: 0 0 12px; font-size: 17px; }
+p { color: var(--muted); line-height: 1.7; }
+
+.hero-actions, .toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(94, 234, 212, 0.42);
+  background: rgba(94, 234, 212, 0.12);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.btn.ghost {
+  border-color: var(--line);
+  background: transparent;
+}
+
+.btn:hover,
+.tabs button:hover {
+  border-color: rgba(94, 234, 212, 0.68);
+  transform: translateY(-1px);
+}
+
+.hero-card { padding: 24px; }
+.card-top { display: flex; justify-content: space-between; align-items: center; }
+.select, input[type="range"] {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 11px 12px;
+}
+
+option { color: #0b1220; }
+
+.gauge {
+  --score: 42;
+  width: 190px;
+  height: 190px;
+  margin: 18px auto 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #0c182a 0 58%, transparent 59%),
+    conic-gradient(var(--green) calc(var(--score) * 1%), rgba(255,255,255,0.1) 0);
+}
+
+.gauge.safe { background: radial-gradient(circle at center, #0c182a 0 58%, transparent 59%), conic-gradient(var(--green) calc(var(--score) * 1%), rgba(255,255,255,0.1) 0); }
+.gauge.warn { background: radial-gradient(circle at center, #0c182a 0 58%, transparent 59%), conic-gradient(var(--yellow) calc(var(--score) * 1%), rgba(255,255,255,0.1) 0); }
+.gauge.danger { background: radial-gradient(circle at center, #0c182a 0 58%, transparent 59%), conic-gradient(var(--red) calc(var(--score) * 1%), rgba(255,255,255,0.1) 0); }
+.gauge.info { background: radial-gradient(circle at center, #0c182a 0 58%, transparent 59%), conic-gradient(var(--blue) calc(var(--score) * 1%), rgba(255,255,255,0.1) 0); }
+
+.gauge strong { font-size: 46px; }
+.gauge span { display: block; color: var(--muted); font-size: 13px; text-align: center; }
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.metric {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 14px;
+}
+
+.metric span, .metric em {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.metric strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 22px;
+}
+
+.metric.compact strong { font-size: 18px; }
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0 18px;
+  overflow-x: auto;
+}
+
+.tabs button {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabs button.active {
+  color: var(--text);
+  border-color: rgba(94,234,212,0.58);
+  background: rgba(94,234,212,0.13);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.panel {
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 18px;
+}
+
+.timeline, .reason-list, .source-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline li, .reason-list li, .source-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted);
+}
+
+.timeline b { color: var(--text); }
+
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.mini-grid div {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.mini-grid span { display: block; color: var(--muted); font-size: 12px; }
+.mini-grid strong { display: block; margin-top: 6px; }
+
+.chip {
+  display: inline-flex;
+  margin: 4px 6px 4px 0;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid currentColor;
+}
+
+.chip.safe { color: var(--green); background: rgba(81,216,138,0.10); }
+.chip.warn { color: var(--yellow); background: rgba(247,201,72,0.10); }
+.chip.danger { color: var(--red); background: rgba(255,107,107,0.10); }
+.chip.info { color: var(--blue); background: rgba(88,166,255,0.10); }
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 44px;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.bar {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--cyan), var(--blue), var(--yellow));
+}
+
+.flow {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.flow-node {
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.055);
+}
+
+.flow-node b { color: var(--cyan); }
+.flow-node span { font-size: 16px; font-weight: 800; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.data-table th, .data-table td {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  color: var(--cyan);
+  background: rgba(255,255,255,0.055);
+}
+
+.slider-block {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.footer {
+  color: var(--muted);
+  text-align: center;
+  padding: 18px;
+}
+
+.guide-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  place-items: center;
+  padding: 28px;
+}
+
+.guide-modal.active {
+  display: grid;
+}
+
+.guide-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 16%, rgba(88, 166, 255, 0.24), transparent 30%),
+    radial-gradient(circle at 78% 18%, rgba(94, 234, 212, 0.20), transparent 28%),
+    rgba(3, 8, 16, 0.78);
+  backdrop-filter: blur(12px);
+}
+
+.guide-dialog {
+  position: relative;
+  width: min(980px, calc(100vw - 36px));
+  max-height: min(86vh, 820px);
+  overflow: auto;
+  border: 1px solid rgba(94, 234, 212, 0.28);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(14, 28, 48, 0.98), rgba(8, 17, 31, 0.96)),
+    radial-gradient(circle at top left, rgba(88, 166, 255, 0.22), transparent 30%);
+  box-shadow: 0 34px 110px rgba(0, 0, 0, 0.56);
+  padding: 26px;
+}
+
+.guide-dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, rgba(94, 234, 212, 0.20), transparent 24%, transparent 74%, rgba(88, 166, 255, 0.18)),
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: auto, 34px 34px, 34px 34px;
+  mask-image: linear-gradient(#000, transparent 88%);
+}
+
+.guide-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.guide-hero {
+  position: relative;
+  padding: 8px 52px 20px 4px;
+}
+
+.guide-hero h2 {
+  margin: 10px 0 10px;
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.guide-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.guide-grid article,
+.guide-route {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.055);
+  padding: 16px;
+}
+
+.guide-grid b {
+  color: var(--cyan);
+  letter-spacing: 0.12em;
+}
+
+.guide-grid h3 {
+  margin: 10px 0 6px;
+}
+
+.guide-grid p {
+  margin: 0;
+}
+
+.guide-route {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.guide-route span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.guide-route strong {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+@media (max-width: 980px) {
+  .hero, .two-col { grid-template-columns: 1fr; }
+  .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .guide-grid { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">AUTOTRUST DATA SPACE</div>
+        <h1>汽车后市场可信数据空间产品化 Demo</h1>
+        <p>
+          原型将里程一致性核验、二手车风险预警、维修必要性判断、可信流转、运营权限和收益测算转化为可交互页面。
+          页面模型用于展示产品路径、输入输出、验证逻辑和商业闭环，不代表真实系统已经上线。
+        </p>
+        <div class="hero-actions">
+          <a class="btn" href="#demo">进入交互演示</a>
+          <a class="btn ghost" id="openGuide" href="#guide">查看说明</a>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <div class="card-top">
+          <div>
+            <span class="eyebrow">当前车辆样本</span>
+            <h3>二手车风险预警卡</h3>
+          </div>
+        </div>
+        <select id="vehicleSelect" class="select"></select>
+        <div id="mainGauge" class="gauge"></div>
+      </aside>
+    </section>
+
+    <section class="metric-grid" id="overviewCards"></section>
+
+    <section id="demo">
+      <nav class="tabs" aria-label="产品模块">
+        <button class="active" data-tab="tab-mileage">里程核验</button>
+        <button data-tab="tab-warning">二手车预警</button>
+        <button data-tab="tab-repair">维修必要性</button>
+        <button data-tab="tab-aftermarket">后装触达</button>
+        <button data-tab="tab-flow">可信流转</button>
+        <button data-tab="tab-permission">运营权限</button>
+        <button data-tab="tab-business">收益测算</button>
+      </nav>
+
+      <section id="tab-mileage" class="tab-panel active">
+        <div class="panel two-col">
+          <div>
+            <h2>里程一致性核验卡</h2>
+            <p>交叉读取维修工单、OBD、检测报告、估值时点与车联网活跃特征，输出改表风险与证据可信度。</p>
+            <div id="mileageGauge" class="gauge"></div>
+            <div id="mileageMetrics" class="mini-grid"></div>
+          </div>
+          <div>
+            <h3>证据时间轴</h3>
+            <ul id="mileageTimeline" class="timeline"></ul>
+            <h3>模型解释</h3>
+            <ul id="mileageReasons" class="reason-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-warning" class="tab-panel">
+        <div class="panel">
+          <h2>二手车风险预警卡</h2>
+          <p>明睿静态证据与联通动态证据在可信边界内聚合，输出改表、事故疑似、履历断点、异常使用、维修复发和估值偏离六类标签。</p>
+          <div id="warningSummary"></div>
+          <div id="warningBars"></div>
+        </div>
+      </section>
+
+      <section id="tab-repair" class="tab-panel">
+        <div class="panel two-col">
+          <div>
+            <h2>维修必要性判断卡</h2>
+            <select id="repairSelect" class="select"></select>
+            <div class="slider-block">
+              <label>门店报价：<strong id="quoteValue"></strong></label>
+              <input id="quoteSlider" type="range" min="600" max="6000" step="100" value="2600" />
+            </div>
+            <div id="repairGauge" class="gauge"></div>
+          </div>
+          <div>
+            <h3>输出结果</h3>
+            <div id="repairOutput"></div>
+            <h3>判断依据</h3>
+            <ul id="repairReasons" class="reason-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-aftermarket" class="tab-panel">
+        <div class="panel two-col">
+          <div>
+            <h2>后装合规触达预览</h2>
+            <p>基于授权标签、车辆状态和触达频控生成后装服务机会评分，只输出客群级推荐，不暴露原始轨迹或个人身份明细。</p>
+            <label class="slider-block">
+              <span><input id="consentToggle" type="checkbox" checked /> 已取得用途授权</span>
+            </label>
+            <div id="aftermarketGauge" class="gauge"></div>
+          </div>
+          <div>
+            <h3>推荐服务包</h3>
+            <div id="aftermarketCards" class="mini-grid"></div>
+            <h3>合规过滤结果</h3>
+            <ul id="aftermarketReasons" class="reason-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-flow" class="tab-panel">
+        <div class="panel">
+          <h2>可信数据流转链路</h2>
+          <p>原始数据不直接外发，按接入、治理、受控计算、结果交付和审计留痕形成可复核服务链。</p>
+          <div id="flow" class="flow"></div>
+        </div>
+        <div class="panel">
+          <h3>公开数据与测算口径</h3>
+          <ul id="sourceNotes" class="source-list"></ul>
+        </div>
+      </section>
+
+      <section id="tab-permission" class="tab-panel">
+        <div class="panel">
+          <h2>运营权限细表</h2>
+          <p>不同主体只能获得与任务、用途和授权相匹配的数据或结果，空间运营方负责目录、权限、日志、计量和争议冻结。</p>
+          <table id="permissionTable" class="data-table"></table>
+        </div>
+      </section>
+
+      <section id="tab-business" class="tab-panel">
+        <div class="panel">
+          <h2>商业验证与收益测算</h2>
+          <p>以二手车风险预警卡作为低成本验证入口，观察单车核验、批量筛车、接口订阅和复购意愿。</p>
+          <div class="slider-block">
+            <label>二手车年化调用比例：<strong id="adoptionValue"></strong></label>
+            <input id="adoptionSlider" type="range" min="0.05" max="1.5" step="0.01" value="0.23" />
+          </div>
+          <div id="businessCards" class="metric-grid"></div>
+          <h3>目标客户优先级</h3>
+          <div id="customerTier"></div>
+        </div>
+      </section>
+    </section>
+
+    <footer class="footer">
+      产品原型仅用于项目展示与验证说明；模型输出为演示口径，不构成正式商业报价、车辆定损或维修结论。
+    </footer>
+  </main>
+
+  <div class="guide-modal" id="guideModal" aria-hidden="true">
+    <div class="guide-backdrop" data-close-guide></div>
+    <section class="guide-dialog" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+      <button class="guide-close" type="button" aria-label="关闭说明" data-close-guide>×</button>
+      <div class="guide-hero">
+        <span class="eyebrow">DEMO GUIDE</span>
+        <h2 id="guideTitle">产品 Demo 演示说明</h2>
+        <p>该页面用于展示汽车后市场可信数据空间从数据核验、模型判断、运营边界到商业验证的产品化能力。</p>
+      </div>
+      <div class="guide-grid">
+        <article>
+          <b>01</b>
+          <h3>建议演示顺序</h3>
+          <p>先切换车辆样本，再查看里程核验、二手车预警、维修必要性和后装触达，最后展示权限与收益测算。</p>
+        </article>
+        <article>
+          <b>02</b>
+          <h3>核心交互点</h3>
+          <p>车辆下拉、维修案例下拉、报价滑块、用途授权开关和调用比例滑块均会实时触发模型计算。</p>
+        </article>
+        <article>
+          <b>03</b>
+          <h3>产品化表达</h3>
+          <p>原始数据不直接外发，页面只呈现核验卡、预警卡、必要性判断、合规触达结果和审计摘要。</p>
+        </article>
+        <article>
+          <b>04</b>
+          <h3>展示口径</h3>
+          <p>样本、价格、风险值与收入测算均为演示口径，用于说明模型逻辑和商业验证路径。</p>
+        </article>
+      </div>
+      <div class="guide-route">
+        <span>推荐讲解链路</span>
+        <strong>车辆样本 → 里程核验 → 风险预警 → 维修判断 → 后装触达 → 权限边界 → 收益测算</strong>
+      </div>
+    </section>
+  </div>
+  <script>
+const vehicles = [
+  {
+    id: "MR-UT-001",
+    name: "2022款新能源SUV / 高活跃样本",
+    ownerSegment: "区域二手车商收车样本",
+    expectedPrice: 168000,
+    marketBasePrice: 176000,
+    mingrui: {
+      repairMileage: [11800, 24600, 39200, 41100],
+      obdMileage: 61200,
+      inspectionMileage: 42600,
+      valuationMileage: 43050,
+      majorRepair: 0.22,
+      structuralRepair: 0.08,
+      repeatRepair: 0.18,
+      partMismatch: 0.12,
+      evidenceGap: 0.16,
+      preSaleRefurbish: 0.25,
+      estimateDeviation: 0.35
+    },
+    unicom: {
+      activeDays180: 151,
+      drivingIntensity: 0.82,
+      abnormalStop: 0.18,
+      regionStability: 0.76,
+      dynamicConflict: 0.72
+    }
+  },
+  {
+    id: "MR-UT-002",
+    name: "2020款燃油轿车 / 履历断点样本",
+    ownerSegment: "检测机构复检样本",
+    expectedPrice: 72800,
+    marketBasePrice: 82000,
+    mingrui: {
+      repairMileage: [33000, 46800, 47100, 46920],
+      obdMileage: 47200,
+      inspectionMileage: 47050,
+      valuationMileage: 46880,
+      majorRepair: 0.42,
+      structuralRepair: 0.33,
+      repeatRepair: 0.56,
+      partMismatch: 0.41,
+      evidenceGap: 0.62,
+      preSaleRefurbish: 0.64,
+      estimateDeviation: 0.58
+    },
+    unicom: {
+      activeDays180: 132,
+      drivingIntensity: 0.64,
+      abnormalStop: 0.52,
+      regionStability: 0.49,
+      dynamicConflict: 0.44
+    }
+  },
+  {
+    id: "MR-UT-003",
+    name: "2023款家用MPV / 低风险样本",
+    ownerSegment: "保险风控接口样本",
+    expectedPrice: 213000,
+    marketBasePrice: 218000,
+    mingrui: {
+      repairMileage: [7200, 15100, 23900, 31800],
+      obdMileage: 32700,
+      inspectionMileage: 32950,
+      valuationMileage: 33020,
+      majorRepair: 0.08,
+      structuralRepair: 0.03,
+      repeatRepair: 0.07,
+      partMismatch: 0.04,
+      evidenceGap: 0.08,
+      preSaleRefurbish: 0.10,
+      estimateDeviation: 0.12
+    },
+    unicom: {
+      activeDays180: 119,
+      drivingIntensity: 0.38,
+      abnormalStop: 0.10,
+      regionStability: 0.88,
+      dynamicConflict: 0.08
+    }
+  }
+];
+
+const repairCases = [
+  {
+    id: "RP-001",
+    title: "制动系统异响 + 高速使用",
+    symptom: "制动异响，近阶段高速通勤频繁",
+    quote: 2600,
+    marketQuote: 2300,
+    faultEvidence: 0.88,
+    diagnosticConsistency: 0.82,
+    partMatch: 0.91,
+    safetyImpact: 0.93,
+    repeatRepair: 0.12,
+    usageIntensity: 0.84
+  },
+  {
+    id: "RP-002",
+    title: "套餐式深度养护推荐",
+    symptom: "门店建议一次性更换多项耗材",
+    quote: 4880,
+    marketQuote: 2100,
+    faultEvidence: 0.22,
+    diagnosticConsistency: 0.28,
+    partMatch: 0.31,
+    safetyImpact: 0.18,
+    repeatRepair: 0.08,
+    usageIntensity: 0.34
+  },
+  {
+    id: "RP-003",
+    title: "电池健康弱信号",
+    symptom: "偶发低压告警，未形成持续性故障",
+    quote: 1200,
+    marketQuote: 1350,
+    faultEvidence: 0.56,
+    diagnosticConsistency: 0.51,
+    partMatch: 0.64,
+    safetyImpact: 0.42,
+    repeatRepair: 0.18,
+    usageIntensity: 0.48
+  }
+];
+
+const permissionRows = [
+  ["明睿", "维修工单、诊断、OBD、检测、估值", "本域清洗、静态风险片段生成、证据质量评估", "联通原始轨迹、通信标识、个人身份明细", "静态证据摘要、质量评分、可调用结果"],
+  ["联通", "连接活跃、行驶强度、区域行为、人车行标签", "本域特征化、动态校验、触达频控", "明睿原始维修明细、门店经营明细", "动态风险片段、连接侧可信标签"],
+  ["空间运营方", "目录、授权、任务、日志、计费记录", "主体准入、任务编排、审计留痕、结算", "原始敏感明细经营、越权复用", "任务状态、授权状态、审计摘要"],
+  ["模型服务方", "脱敏特征、模型参数、特征字典", "训练、推理、评估、漂移监控", "可识别原始样本留存、反向识别", "评分、标签、解释摘要"],
+  ["场景客户", "授权车辆结果、核验卡、预警卡、必要性判断卡", "收车筛查、重点复检、售前说明、维修复核", "原始数据下载、二次转售、超用途使用", "风险等级、核验结论、复核建议"]
+];
+
+const aftermarketSegments = [
+  {
+    name: "新能源充电与补能服务包",
+    interest: 0.78,
+    vehicleAgeFit: 0.72,
+    repairLink: 0.38,
+    regionFit: 0.82,
+    fatigueRisk: 0.18,
+    sensitiveUseRisk: 0.16
+  },
+  {
+    name: "安全辅助与行车记录升级包",
+    interest: 0.64,
+    vehicleAgeFit: 0.66,
+    repairLink: 0.54,
+    regionFit: 0.58,
+    fatigueRisk: 0.22,
+    sensitiveUseRisk: 0.20
+  },
+  {
+    name: "舒适性内饰与轻改装服务包",
+    interest: 0.52,
+    vehicleAgeFit: 0.48,
+    repairLink: 0.22,
+    regionFit: 0.62,
+    fatigueRisk: 0.44,
+    sensitiveUseRisk: 0.28
+  }
+];
+
+const sourceNotes = [
+  "公安部交通管理局公开统计用于估算车辆保有量与潜在核验车辆基数。",
+  "中国汽车流通协会公开口径用于估算二手车交易规模与风险核验调用空间；演示测算采用 1942.64 万辆作为年化二手车交易基数。",
+  "汽车后市场公开研究口径用于判断维修、养护、检测、后装等服务的商业承接能力。",
+  "页面收入测算为演示模型口径，用于说明调用量、运营成本与回本周期之间的关系；默认单车核验价格 69 元为产品试点假设价，不代表已实现收入。"
+];
+
+
+function clamp(value, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function pct(value) {
+  return Math.round(clamp(value) * 100);
+}
+
+function riskLevel(score) {
+  if (score >= 0.72) return { label: "高风险", tone: "danger" };
+  if (score >= 0.45) return { label: "中风险", tone: "warn" };
+  if (score >= 0.25) return { label: "低风险", tone: "safe" };
+  return { label: "较低风险", tone: "safe" };
+}
+
+function evaluateMileage(vehicle, override = {}) {
+  const m = vehicle.mingrui;
+  const u = vehicle.unicom;
+  const repair = override.repairMileage || m.repairMileage;
+  const allMileage = [...repair, m.obdMileage, m.inspectionMileage, m.valuationMileage];
+  const inversions = repair.slice(1).filter((value, index) => value < repair[index]).length;
+  const sourceSpread = Math.max(...allMileage) - Math.min(...allMileage);
+  const activeConflict = u.activeDays180 > 120 && u.drivingIntensity > 0.55 && sourceSpread > 12000 ? 1 : 0;
+  const odometerConflict = clamp(sourceSpread / 26000);
+  const rollbackScore = clamp(
+    inversions * 0.38 +
+    activeConflict * 0.34 +
+    odometerConflict * 0.28 +
+    u.dynamicConflict * 0.22
+  );
+  const evidence = clamp(1 - m.evidenceGap * 0.62 + Math.min(repair.length, 5) * 0.05);
+  const level = riskLevel(rollbackScore);
+
+  return {
+    score: rollbackScore,
+    evidence,
+    label: level.label,
+    tone: level.tone,
+    metrics: [
+      ["里程倒挂次数", inversions],
+      ["多源里程差", `${sourceSpread.toLocaleString()} km`],
+      ["动态冲突", `${pct(u.dynamicConflict)}%`],
+      ["证据可信度", `${pct(evidence)}%`]
+    ],
+    reasons: [
+      inversions > 0 ? "维修里程时间轴存在倒挂" : "维修里程时间轴未发现倒挂",
+      activeConflict ? "高活跃车辆与表显里程增长不匹配" : "动态使用强度与里程记录基本匹配",
+      sourceSpread > 10000 ? "OBD、检测、估值里程差异较大" : "多来源里程差异处于可解释范围"
+    ]
+  };
+}
+
+function repairLinkScore(vehicle) {
+  const m = vehicle.mingrui;
+  const u = vehicle.unicom;
+  return clamp(
+    0.22 * m.structuralRepair +
+    0.18 * m.repeatRepair +
+    0.16 * m.partMismatch +
+    0.16 * m.evidenceGap +
+    0.14 * m.preSaleRefurbish +
+    0.14 * u.dynamicConflict
+  );
+}
+
+function usedCarWarning(vehicle) {
+  const mileage = evaluateMileage(vehicle);
+  const m = vehicle.mingrui;
+  const u = vehicle.unicom;
+  const dims = {
+    改表风险: mileage.score,
+    事故疑似: clamp(0.55 * m.structuralRepair + 0.25 * u.abnormalStop + 0.20 * m.majorRepair),
+    履历断点: clamp(0.70 * m.evidenceGap + 0.30 * (1 - u.regionStability)),
+    异常使用: clamp(0.45 * u.drivingIntensity + 0.30 * u.abnormalStop + 0.25 * u.dynamicConflict),
+    维修复发: clamp(0.62 * m.repeatRepair + 0.22 * m.partMismatch + 0.16 * m.majorRepair),
+    估值偏离: clamp(0.55 * m.estimateDeviation + 0.25 * m.evidenceGap + 0.20 * mileage.score)
+  };
+  const base =
+    0.22 * dims.改表风险 +
+    0.20 * dims.事故疑似 +
+    0.18 * dims.履历断点 +
+    0.15 * dims.异常使用 +
+    0.15 * dims.维修复发 +
+    0.10 * dims.估值偏离;
+  const link = repairLinkScore(vehicle);
+  const fused = clamp(0.72 * base + 0.28 * link);
+  const level = riskLevel(fused);
+
+  return {
+    base,
+    repairLink: link,
+    fused,
+    label: level.label,
+    tone: level.tone,
+    dims,
+    valuation: {
+      base: vehicle.marketBasePrice,
+      suggested: Math.round(vehicle.marketBasePrice * (1 - fused * 0.16)),
+      gap: Math.round(vehicle.marketBasePrice - vehicle.expectedPrice)
+    }
+  };
+}
+
+function evaluateRepair(item, adjust = {}) {
+  const quote = Number(adjust.quote ?? item.quote);
+  const quoteAbnormal = clamp((quote - item.marketQuote) / Math.max(item.marketQuote, 1));
+  const need =
+    0.28 * item.faultEvidence +
+    0.22 * item.diagnosticConsistency +
+    0.18 * item.partMatch +
+    0.22 * item.safetyImpact +
+    0.10 * item.usageIntensity;
+  const overRepair = clamp(
+    0.35 * quoteAbnormal +
+    0.25 * (1 - item.diagnosticConsistency) +
+    0.20 * (1 - item.partMatch) +
+    0.20 * (1 - item.safetyImpact)
+  );
+
+  let grade = "观察";
+  if (item.safetyImpact > 0.82 && need > 0.72) grade = "必修";
+  else if (need > 0.58 && overRepair < 0.55) grade = "建议修";
+  else if (need < 0.35 && overRepair > 0.55) grade = "无需修";
+
+  return {
+    need: clamp(need),
+    overRepair,
+    grade,
+    quoteAbnormal,
+    reasons: [
+      `诊断一致性 ${pct(item.diagnosticConsistency)}%`,
+      `配件适配 ${pct(item.partMatch)}%`,
+      `安全影响 ${pct(item.safetyImpact)}%`,
+      quoteAbnormal > 0.35 ? "报价显著高于基准区间" : "报价未明显偏离基准区间"
+    ]
+  };
+}
+
+function aftermarketOpportunity(segment, authorized = true) {
+  const rawScore = clamp(
+    0.28 * segment.interest +
+    0.20 * segment.vehicleAgeFit +
+    0.16 * segment.repairLink +
+    0.18 * segment.regionFit +
+    0.10 * (1 - segment.fatigueRisk) +
+    0.08 * (1 - segment.sensitiveUseRisk)
+  );
+  const compliancePenalty = authorized ? 0 : 0.62;
+  const score = clamp(rawScore - compliancePenalty);
+  const blocked = !authorized || segment.sensitiveUseRisk > 0.5 || segment.fatigueRisk > 0.65;
+  const level = blocked
+    ? { label: "暂不触达", tone: "warn" }
+    : score >= 0.68
+      ? { label: "优先触达", tone: "safe" }
+      : score >= 0.48
+        ? { label: "谨慎触达", tone: "warn" }
+        : { label: "低优先级", tone: "info" };
+
+  return {
+    score,
+    label: level.label,
+    tone: level.tone,
+    blocked,
+    reasons: [
+      authorized ? "已取得用途授权，可进入触达候选池" : "缺少用途授权，不进入触达候选池",
+      segment.fatigueRisk > 0.45 ? "近期触达频率偏高，需要降频" : "触达频率处于可控区间",
+      segment.sensitiveUseRisk > 0.35 ? "存在敏感使用场景风险，需保守输出" : "未触发敏感使用场景过滤",
+      `区域适配度 ${pct(segment.regionFit)}%，服务兴趣度 ${pct(segment.interest)}%`
+    ]
+  };
+}
+
+function revenueScenario(adoptionRate, unitPrice = 69) {
+  const annualUsedCarVolume = 19_426_400;
+  const annualCalls = Math.round(annualUsedCarVolume * adoptionRate);
+  const annualRevenue = annualCalls * unitPrice;
+  const monthlyRevenue = annualRevenue / 12;
+  const fixedInvestment = 1_500_000;
+  const monthlyOperatingCost = 120_000;
+  const monthlyNet = monthlyRevenue - monthlyOperatingCost;
+  const payback = monthlyNet > 0 ? fixedInvestment / monthlyNet : Infinity;
+
+  return {
+    annualCalls,
+    annualRevenue,
+    monthlyRevenue,
+    monthlyNet,
+    payback
+  };
+}
+
+function customerScore(weights) {
+  const score =
+    0.22 * weights.pain +
+    0.16 * weights.frequency +
+    0.14 * weights.dataReady +
+    0.14 * weights.feedback +
+    0.14 * weights.budget +
+    0.10 * weights.channel +
+    0.10 * (1 - weights.integrationCost);
+  if (score >= 0.72) return { score, tier: "A类真实车源试点客户" };
+  if (score >= 0.56) return { score, tier: "B类样本试算客户" };
+  if (score >= 0.40) return { score, tier: "后续培育客户" };
+  return { score, tier: "暂缓跟进客户" };
+}
+
+
+
+
+const $ = (selector) => document.querySelector(selector);
+
+let currentVehicle = vehicles[2];
+let currentRepair = repairCases[0];
+
+function money(value) {
+  if (!Number.isFinite(value)) return "不可回本";
+  if (Math.abs(value) >= 10000) return `${(value / 10000).toFixed(2)} 万元`;
+  return `${Math.round(value).toLocaleString()} 元`;
+}
+
+function chip(text, tone = "safe") {
+  return `<span class="chip ${tone}">${text}</span>`;
+}
+
+function setGauge(el, score, label, tone) {
+  el.style.setProperty("--score", pct(score));
+  el.className = `gauge ${tone}`;
+  el.innerHTML = `<strong>${pct(score)}</strong><span>${label}</span>`;
+}
+
+function renderVehicleOptions() {
+  const select = $("#vehicleSelect");
+  select.innerHTML = vehicles.map((v) => `<option value="${v.id}">${v.name}</option>`).join("");
+  select.value = currentVehicle.id;
+  select.addEventListener("change", () => {
+    currentVehicle = vehicles.find((v) => v.id === select.value) || vehicles[0];
+    renderAll();
+  });
+}
+
+function renderRepairOptions() {
+  const select = $("#repairSelect");
+  select.innerHTML = repairCases.map((r) => `<option value="${r.id}">${r.title}</option>`).join("");
+  select.addEventListener("change", () => {
+    currentRepair = repairCases.find((r) => r.id === select.value) || repairCases[0];
+    $("#quoteSlider").value = currentRepair.quote;
+    renderAll();
+  });
+  $("#quoteSlider").addEventListener("input", renderAll);
+  $("#adoptionSlider").addEventListener("input", renderBusiness);
+  $("#consentToggle").addEventListener("change", renderAftermarket);
+}
+
+function renderOverview() {
+  const warning = usedCarWarning(currentVehicle);
+  const mileage = evaluateMileage(currentVehicle);
+  const repair = evaluateRepair(currentRepair, { quote: $("#quoteSlider").value });
+  setGauge($("#mainGauge"), warning.fused, warning.label, warning.tone);
+  $("#overviewCards").innerHTML = [
+    ["里程核验", `${pct(mileage.score)}%`, mileage.label],
+    ["二手车预警", `${pct(warning.fused)}%`, warning.label],
+    ["维修必要性", repair.grade, `过修风险 ${pct(repair.overRepair)}%`],
+    ["RepairLinkScore", `${pct(warning.repairLink)}%`, "交易与维修联动"],
+    ["FusedWarningScore", `${pct(warning.fused)}%`, "融合预警值"],
+    ["建议残值", money(warning.valuation.suggested), `基准 ${money(warning.valuation.base)}`]
+  ].map(([k, v, d]) => `<article class="metric"><span>${k}</span><strong>${v}</strong><em>${d}</em></article>`).join("");
+}
+
+function renderMileage() {
+  const result = evaluateMileage(currentVehicle);
+  setGauge($("#mileageGauge"), result.score, result.label, result.tone);
+  $("#mileageTimeline").innerHTML = [
+    ...currentVehicle.mingrui.repairMileage.map((v, i) => [`维修工单 ${i + 1}`, v]),
+    ["OBD读取", currentVehicle.mingrui.obdMileage],
+    ["检测报告", currentVehicle.mingrui.inspectionMileage],
+    ["估值时点", currentVehicle.mingrui.valuationMileage]
+  ].map(([name, value]) => `<li><span>${name}</span><b>${value.toLocaleString()} km</b></li>`).join("");
+  $("#mileageReasons").innerHTML = result.reasons.map((r) => `<li>${r}</li>`).join("");
+  $("#mileageMetrics").innerHTML = result.metrics.map(([k, v]) => `<div><span>${k}</span><strong>${v}</strong></div>`).join("");
+}
+
+function renderWarning() {
+  const result = usedCarWarning(currentVehicle);
+  const max = Math.max(...Object.values(result.dims), 0.01);
+  $("#warningBars").innerHTML = Object.entries(result.dims).map(([name, value]) => `
+    <div class="bar-row">
+      <span>${name}</span>
+      <div class="bar"><i style="width:${(value / max) * 100}%"></i></div>
+      <b>${pct(value)}%</b>
+    </div>
+  `).join("");
+  $("#warningSummary").innerHTML = `
+    ${chip(result.label, result.tone)}
+    ${chip(`维修联动 ${pct(result.repairLink)}%`, result.repairLink > 0.55 ? "warn" : "safe")}
+    ${chip(`建议残值 ${money(result.valuation.suggested)}`, "info")}
+  `;
+}
+
+function renderRepair() {
+  const quote = Number($("#quoteSlider").value);
+  $("#quoteValue").textContent = money(quote);
+  const result = evaluateRepair(currentRepair, { quote });
+  const tone = result.grade === "必修" ? "danger" : result.grade === "无需修" ? "safe" : "warn";
+  setGauge($("#repairGauge"), result.need, result.grade, tone);
+  $("#repairOutput").innerHTML = `
+    ${chip(`必要性：${result.grade}`, result.grade === "无需修" ? "safe" : "warn")}
+    ${chip(`过度维修风险 ${pct(result.overRepair)}%`, result.overRepair > 0.55 ? "danger" : "safe")}
+    ${chip(`报价偏离 ${pct(result.quoteAbnormal)}%`, result.quoteAbnormal > 0.35 ? "warn" : "info")}
+  `;
+  $("#repairReasons").innerHTML = result.reasons.map((r) => `<li>${r}</li>`).join("");
+}
+
+function renderPermissions() {
+  $("#permissionTable").innerHTML = `
+    <thead><tr><th>主体</th><th>可运营数据</th><th>允许动作</th><th>禁止范围</th><th>可见结果</th></tr></thead>
+    <tbody>${permissionRows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody>
+  `;
+}
+
+function renderAftermarket() {
+  const authorized = $("#consentToggle").checked;
+  const results = aftermarketSegments.map((segment) => ({
+    segment,
+    result: aftermarketOpportunity(segment, authorized)
+  }));
+  const top = results.reduce((best, item) => item.result.score > best.result.score ? item : best, results[0]);
+  setGauge($("#aftermarketGauge"), top.result.score, top.result.label, top.result.tone);
+  $("#aftermarketCards").innerHTML = results.map(({ segment, result }) => `
+    <div>
+      <span>${segment.name}</span>
+      <strong>${pct(result.score)}%</strong>
+      <em>${result.label}</em>
+    </div>
+  `).join("");
+  $("#aftermarketReasons").innerHTML = top.result.reasons.map((reason) => `<li>${reason}</li>`).join("");
+}
+
+function renderBusiness() {
+  const adoption = Number($("#adoptionSlider").value) / 100;
+  $("#adoptionValue").textContent = `${(adoption * 100).toFixed(2)}%`;
+  const revenue = revenueScenario(adoption);
+  $("#businessCards").innerHTML = [
+    ["年调用量", `${revenue.annualCalls.toLocaleString()} 次`],
+    ["年收入", money(revenue.annualRevenue)],
+    ["月净收益", money(revenue.monthlyNet)],
+    ["回本周期", Number.isFinite(revenue.payback) ? `${revenue.payback.toFixed(1)} 个月` : "不可回本"]
+  ].map(([k, v]) => `<article class="metric compact"><span>${k}</span><strong>${v}</strong></article>`).join("");
+
+  const score = customerScore({
+    pain: 0.86,
+    frequency: 0.78,
+    dataReady: 0.72,
+    feedback: 0.80,
+    budget: 0.66,
+    channel: 0.76,
+    integrationCost: 0.32
+  });
+  $("#customerTier").innerHTML = `${chip(score.tier, score.score > 0.72 ? "safe" : "warn")} <span>ICP 得分 ${pct(score.score)}%</span>`;
+}
+
+function renderFlow() {
+  $("#flow").innerHTML = ["接入", "清洗", "入湖", "发布", "撮合", "交付", "计费", "审计"].map((step, index) => `
+    <div class="flow-node">
+      <b>${String(index + 1).padStart(2, "0")}</b>
+      <span>${step}</span>
+    </div>
+  `).join("");
+  $("#sourceNotes").innerHTML = sourceNotes.map((source) => `<li>${source}</li>`).join("");
+}
+
+function renderAll() {
+  renderOverview();
+  renderMileage();
+  renderWarning();
+  renderRepair();
+  renderAftermarket();
+  renderPermissions();
+  renderBusiness();
+  renderFlow();
+}
+
+function bindTabs() {
+  document.querySelectorAll("[data-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("active"));
+      button.classList.add("active");
+      $(`#${button.dataset.tab}`).classList.add("active");
+    });
+  });
+}
+
+function bindGuide() {
+  const modal = $("#guideModal");
+  const open = $("#openGuide");
+  const closeTargets = document.querySelectorAll("[data-close-guide]");
+  open.addEventListener("click", (event) => {
+    event.preventDefault();
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden", "false");
+  });
+  closeTargets.forEach((target) => {
+    target.addEventListener("click", () => {
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && modal.classList.contains("active")) {
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+    }
+  });
+}
+
+renderVehicleOptions();
+renderRepairOptions();
+bindTabs();
+bindGuide();
+renderAll();
+
+</script>
+</body>
+</html>

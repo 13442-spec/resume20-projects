@@ -1,0 +1,9 @@
+.group-row{display:flex;align-items:center;gap:3px;min-width:0}
+.group-row .group-item{min-width:0;flex:1}
+.delete-group{width:23px;height:25px;flex:none;border:0;border-radius:5px;background:transparent;color:#9aa59f;opacity:0;font-size:13px;padding:0}
+.group-row:hover .delete-group,.group-row:focus-within .delete-group{opacity:1}
+.delete-group:hover{background:#fcf0ef;color:var(--red)}
+@media(max-width:900px){.group-row{flex:0 0 auto;width:auto}.group-row .group-item{width:auto;flex:none}.delete-group{opacity:1}}
+/* Expandable recipes keep the prompt library within reach. */
+.recipe-panel{flex:none;margin:16px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:#f0f7f3}.recipe-panel h2{margin:0 0 8px;font-size:18px}.recipe-panel p{font-size:12px;line-height:1.7;color:#526c60}.recipe-panel input{width:100%;padding:10px;margin:8px 0;border:1px solid #bbd6c8;border-radius:8px}.recipe-panel label{font-size:13px}#recipe-results{max-height:270px;overflow:auto}.recipe{border-top:1px solid #d8e5dd;padding:10px 2px}.recipe summary{cursor:pointer;font-weight:600;font-size:13px}.recipe button{margin:6px 0}.sidebar .group-list{max-height:190px;overflow:auto}.page-heading,.search-row,.filter-row,.prompt-grid{flex-shrink:0}@media(max-width:900px){.sidebar-foot{display:flex}.recipe-panel{padding:12px}}
+@media(max-width:900px){.workspace,.app-shell:has(.composer.collapsed) .workspace{grid-template-columns:minmax(0,1fr)}.sidebar,.composer,.sidebar-section{min-width:0}.group-list,.category-list{max-width:100%}}
